@@ -17,4 +17,3 @@ services:
       - key: WEBMAN_PORT
         value: 8789
     healthCheckPath: /
-    dockerfile: Dockerfile
