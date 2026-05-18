@@ -1,0 +1,12 @@
+vendor/
+runtime/
+*.log
+.DS_Store
+.env
+.env.local
+.cursor/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

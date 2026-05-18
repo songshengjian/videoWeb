@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{$systemName|default='影视站'}</title>
+    <link rel="stylesheet" href="../../../public/css/nav.css">
+    <style>
+        * {margin:0; padding:0; box-sizing:border-box;}
+        body {
+            font-family: 'Microsoft YaHei', Arial;
+            background:
+                radial-gradient(900px 600px at 10% -10%, #dff7e8 0%, transparent 60%),
+                radial-gradient(900px 600px at 110% -20%, #e1f3ff 0%, transparent 55%),
+                #f3f8f4;
+        }
+
+        /* 广告样式由 /ads/ads.css 提供 */
+
+        /* Header */
+        .header {position: sticky; top:5px; z-index:1000; background:#fff; padding:15px 0; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+        .header-container {max-width:1200px; margin:0 auto; display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:20px; padding:0 20px;}
+        .logo {font-size:28px; font-weight:bold; color:#16a34a; text-decoration:none;}
+        .nav-dropdown {display:flex; gap:15px; justify-content:center; flex:1; overflow:hidden; position:relative; z-index:1001;}
+        .nav-item, .nav-dropdown-item {padding:8px 16px; border-radius:20px; text-decoration:none; font-size:14px; color:#333; transition:0.3s; white-space:nowrap;}
+        .nav-item {pointer-events:auto; cursor:pointer;}
+        .nav-item.active, .nav-dropdown-item.active {background: linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
+        .search-box {position:relative; flex-shrink:0;}
+        .search-input {width:250px; padding:10px 40px 10px 15px; border:2px solid #ccc; border-radius:25px; outline:none; transition:0.3s;}
+        .search-input:focus {border-color:#16a34a; box-shadow:0 0 8px rgba(34,197,94,0.3);}
+        .search-btn {position:absolute; right:5px; top:50%; transform:translateY(-50%); width:32px; height:32px; border:none; border-radius:50%; background: linear-gradient(135deg,#16a34a,#22c55e); color:#fff; cursor:pointer;}
+
+        /* 视频列表 */
+        .video_content_card {display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; max-width:1400px; margin:10px auto 40px; padding-left:120px; padding-right:120px;}
+        .video-card {background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1); display:flex; flex-direction:column; transition:0.3s;}
+        .video-card:hover {transform:translateY(-5px); box-shadow:0 8px 20px rgba(0,0,0,0.15);}
+        .card-image {width:100%; height:200px; object-fit:cover;}
+        .card-content {padding:15px; flex-grow:1; display:flex; flex-direction:column;}
+        .card-title {font-size:18px; font-weight:600; margin-bottom:10px; color:#333;}
+        .card-subtitle {font-size:14px; color:#666; margin-bottom:10px;}
+        .card-info {display:flex; justify-content:space-between; font-size:12px; color:#888; margin-top:auto;}
+        .card-tag {display:inline-block; background:#f0f0f0; color:#666; padding:3px 8px; border-radius:4px; margin-right:5px; margin-bottom:5px; font-size:12px;}
+        .card-footer {display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid #f0f0f0;}
+        .update-info {font-size:12px; color:#22c55e; font-weight:500;}
+        .play-btn {background:#22c55e; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; transition:0.3s;}
+        .play-btn:hover {background:#16a34a;}
+        .no-data {text-align:center; padding:40px; color:#999; grid-column:1/-1;}
+
+        @media(max-width:1024px){.video_content_card {padding-left:20px; padding-right:20px;} #ad-left,#ad-right{display:none;}}
+        @media(max-width:768px){
+            .header-container{grid-template-columns:1fr; gap:12px; padding:0 12px;}
+            .logo{font-size:22px; text-align:center;}
+            .nav-dropdown{overflow-x:auto; justify-content:flex-start;}
+            .nav-item, .nav-dropdown-item{font-size:13px; padding:6px 12px;}
+            .search-box{width:100%;}
+            .search-input{width:100%;}
+            .video_content_card{grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; padding-left:12px; padding-right:12px;}
+            #ad-left,#ad-right{display:none;}
+        }
+        @media(max-width:768px){.video_content_card{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));}}
+        @media(max-width:480px){.video_content_card{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+
+   
+    <!-- Header -->
+<header class="header">
+    <div class="header-container">
+        <a href="{$systemLogo|default='/'}" class="logo">{$systemName|default='影视站'}</a>
+        <nav class="nav-dropdown">
+            <div class="nav-main-items">
+                <a href="/index/index" class="nav-item {$navItem.active?'active':''}">首页</a>
+                {foreach $navItemShow as $navItem}
+                    <a href="/index/nav?tid={$navItem.type_id}" class="nav-item {$navItem.active?'active':''}">{$navItem.type_name}</a>
+                {/foreach}
+            </div>
+        </nav>
+        <div class="search-box">
+            <form method="GET" action="/index/search">
+                <input type="text" name="keyword" class="search-input" placeholder="搜索电影、电视剧..." value="{$currentKeyword|default=''}">
+                <button type="submit" class="search-btn">🔍</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<!-- 顶部广告（导航下方） -->
+<div id="ad-top"></div>
+
+    
+
+    <!-- 左右悬浮广告 -->
+    <div id="ad-left"></div>
+    <div id="ad-right"></div>
+
+    <!-- 视频列表 -->
+    <div class="video_content_card">
+        {if isset($videoData.list) && !empty($videoData.list)}
+            {foreach $videoData.list as $video}
+            <div class="video-card">
+                <img src="{$video.vod_pic}" class="card-image">
+                <div class="card-content">
+                    <h3 class="card-title">{$video.vod_name}</h3>
+                    <div class="card-info">
+                        <span>主演: {if !empty($video.vod_actor)}{$video.vod_actor}{else}未知{/if}</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="update-info">{$video.vod_remarks}</span>
+                        <button class="play-btn" onclick="playVideo('{$video.vod_name}')">播放</button>
+                    </div>
+                </div>
+            </div>
+            {/foreach}
+        {else}
+            <div class="no-data"><p>暂无视频数据</p></div>
+        {/if}
+    </div>
+
+    <!-- 视频底部广告 -->
+    <div id="ad-video-bottom"></div>
+
+    <!-- 底部悬浮广告 -->
+    <div id="ad-bottom"></div>
+
+<script src="/ads/ads.js"></script>
+<script>
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        const href = item.getAttribute('href');
+        if (href) {
+            window.location.href = href;
+        }
+    });
+});
+function playVideo(vod_name){
+    window.location.href = '/index/search?keyword='+encodeURIComponent(vod_name);
+}
+</script>
+
+</body>
+</html>

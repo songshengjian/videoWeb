@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: videoweb-backend
+    env: php
+    region: oregon
+    branch: main
+    buildCommand: composer install --no-dev --optimize-autoloader
+    startCommand: php start.php start
+    disk:
+      type: persistent
+      name: runtime-data
+      mountPath: /app/runtime
+      sizeGB: 1
+    envVars:
+      - key: PHP_VERSION
+        value: 8.2
+      - key: WEBMAN_PORT
+        value: 8789
+    healthCheckPath: /
+    dockerfile: Dockerfile
