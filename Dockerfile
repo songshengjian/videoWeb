@@ -29,5 +29,5 @@ RUN composer install --no-dev --optimize-autoloader
 # Expose port
 EXPOSE 8789
 
-# Start the application
-CMD ["php", "start.php", "start"]
+# Start webman in foreground mode
+CMD ["php", "start.php", "start", "-f"]

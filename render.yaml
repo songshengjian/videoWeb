@@ -11,3 +11,4 @@ services:
       mountPath: /app/runtime
       sizeGB: 1
     healthCheckPath: /
+    numInstances: 1
