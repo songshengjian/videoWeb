@@ -120,6 +120,163 @@ class IndexController
         return json(['ok' => true]);
     }
 
+    // ===== API 接口方法（供 Android 客户端使用）=====
+    
+    /**
+     * 获取视频列表（首页）
+     */
+    public function getVideoList(Request $request)
+    {
+        $page = (int)$request->get('page', 1);
+        $limit = (int)$request->get('limit', 20);
+        $typeId = (int)$request->get('type_id', 0);
+        
+        $info = VideoUtils::getAvailableChannel();
+        if (!$info) {
+            return json(['code' => 0, 'msg' => '无可用视频源', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
+        }
+        
+        $channel = $info['channel'];
+        $url = rtrim($channel['channel_url'], '/') . '/?ac=detail' . ($typeId > 0 ? '&t=' . $typeId : '') . '&pg=' . $page . '&limit=' . $limit;
+        
+        $options = [
+            'http' => [
+                'method'  => 'GET',
+                'header'  => [
+                    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                    "Accept: application/json",
+                ],
+                'timeout' => 30,
+            ]
+        ];
+        $context = stream_context_create($options);
+        $resp = @file_get_contents($url, false, $context);
+        
+        if ($resp === false) {
+            return json(['code' => 0, 'msg' => '获取视频列表失败', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
+        }
+        
+        $data = json_decode($resp, true);
+        if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
+            return json($data);
+        }
+        
+        // 解析失败，返回原始数据但标记错误
+        return json(['code' => 0, 'msg' => '数据解析失败', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
+    }
+    
+    /**
+     * 获取视频分类列表
+     */
+    public function getVideoTypes(Request $request)
+    {
+        $info = VideoUtils::getAvailableChannel();
+        if (!$info) {
+            return json(['code' => 0, 'msg' => '无可用视频源', 'class' => []]);
+        }
+        
+        $vodData = $info['data'];
+        $class = $vodData['class'] ?? [];
+        
+        // 过滤黑名单
+        $blacklist = VideoUtils::blacklist();
+        $class = array_filter($class, function ($item) use ($blacklist) {
+            return !in_array($item['type_name'] ?? '', $blacklist, true);
+        });
+        
+        return json(['code' => 1, 'msg' => 'success', 'class' => array_values($class)]);
+    }
+    
+    /**
+     * 搜索视频
+     */
+    public function searchVideos(Request $request)
+    {
+        $keyword = $request->get('wd', '');
+        $page = (int)$request->get('page', 1);
+        $limit = (int)$request->get('limit', 20);
+        
+        if (empty($keyword)) {
+            return json(['code' => 0, 'msg' => '搜索关键词不能为空', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
+        }
+        
+        $info = VideoUtils::getAvailableChannel();
+        if (!$info) {
+            return json(['code' => 0, 'msg' => '无可用视频源', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
+        }
+        
+        $channel = $info['channel'];
+        $url = rtrim($channel['channel_url'], '/') . '/?ac=detail&wd=' . urlencode($keyword) . '&pg=' . $page . '&limit=' . $limit;
+        
+        $options = [
+            'http' => [
+                'method'  => 'GET',
+                'header'  => [
+                    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                    "Accept: application/json",
+                ],
+                'timeout' => 30,
+            ]
+        ];
+        $context = stream_context_create($options);
+        $resp = @file_get_contents($url, false, $context);
+        
+        if ($resp === false) {
+            return json(['code' => 0, 'msg' => '搜索失败', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
+        }
+        
+        $data = json_decode($resp, true);
+        if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
+            return json($data);
+        }
+        
+        return json(['code' => 0, 'msg' => '搜索结果解析失败', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
+    }
+    
+    /**
+     * 获取视频详情
+     */
+    public function getVideoDetail(Request $request)
+    {
+        $ids = $request->get('ids', '');
+        
+        if (empty($ids)) {
+            return json(['code' => 0, 'msg' => '视频 ID 不能为空', 'list' => []]);
+        }
+        
+        $info = VideoUtils::getAvailableChannel();
+        if (!$info) {
+            return json(['code' => 0, 'msg' => '无可用视频源', 'list' => []]);
+        }
+        
+        $channel = $info['channel'];
+        $url = rtrim($channel['channel_url'], '/') . '/?ac=detail&ids=' . $ids;
+        
+        $options = [
+            'http' => [
+                'method'  => 'GET',
+                'header'  => [
+                    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                    "Accept: application/json",
+                ],
+                'timeout' => 30,
+            ]
+        ];
+        $context = stream_context_create($options);
+        $resp = @file_get_contents($url, false, $context);
+        
+        if ($resp === false) {
+            return json(['code' => 0, 'msg' => '获取视频详情失败', 'list' => []]);
+        }
+        
+        $data = json_decode($resp, true);
+        if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
+            return json($data);
+        }
+        
+        return json(['code' => 0, 'msg' => '视频详情解析失败', 'list' => []]);
+    }
+
     function proxy(Request $request)
     {
         $url = $request->get('url');

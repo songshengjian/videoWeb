@@ -14,15 +14,19 @@
 
 use Webman\Route;
 use app\controller\AdminController;
+use app\controller\IndexController;
 
 
 
+Route::get('/', [IndexController::class, 'index']);
+Route::get('/index/nav', [IndexController::class, 'nav']);
+Route::post('/index/search-hit', [IndexController::class, 'searchHit']);
 
-
-Route::get('/', [app\controller\IndexController::class, 'index']);
-Route::get('/index/nav', [app\controller\IndexController::class, 'nav']);
-Route::post('/index/search-hit', [app\controller\IndexController::class, 'searchHit']);
-
+// 视频 API 路由（供 Android 客户端使用）
+Route::get('/api/video/list', [IndexController::class, 'getVideoList']);
+Route::get('/api/video/type', [IndexController::class, 'getVideoTypes']);
+Route::get('/api/video/search', [IndexController::class, 'searchVideos']);
+Route::get('/api/video/detail', [IndexController::class, 'getVideoDetail']);
 
 // 登录页面
 Route::get('/admin/login', [AdminController::class, 'loginPage']);
@@ -40,7 +44,7 @@ Route::get('/admin/channels', [AdminController::class, 'channelsPage']);
 Route::post('/admin/channels', [AdminController::class, 'saveChannels']);
 
 // 前端读取广告
-Route::get('/ads.json', [app\controller\IndexController::class, 'getAds']);
+Route::get('/ads.json', [IndexController::class, 'getAds']);
 
 // 登出
 Route::get('/admin/logout', [AdminController::class, 'logout']);
