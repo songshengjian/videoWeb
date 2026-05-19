@@ -54,3 +54,6 @@ Route::get('/ads.json', [IndexController::class, 'getAds']);
 Route::get('/admin/logout', [AdminController::class, 'logout']);
 // 主题切换
 Route::post('/admin/theme', [AdminController::class, 'saveTheme']);
+
+// 临时：清除频道缓存
+Route::get('/debug/clear-cache', [IndexController::class, 'clearCache']);
