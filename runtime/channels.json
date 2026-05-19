@@ -1,0 +1,42 @@
+{
+    "code": 1,
+    "list": [
+        {
+            "channel_id": 1,
+            "channel_name": "索尼资源",
+            "channel_url": "https://suoniapi.com/api.php/provide/vod/",
+            "channel_status": "1",
+            "channel_sort": "99",
+            "create_time": "2026-05-19 08:00:00",
+            "update_time": "2026-05-19 08:00:00"
+        },
+        {
+            "channel_id": 2,
+            "channel_name": "量子资源",
+            "channel_url": "https://cj.lziapi.com/api.php/provide/vod/",
+            "channel_status": "1",
+            "channel_sort": "98",
+            "create_time": "2026-05-19 08:00:00",
+            "update_time": "2026-05-19 08:00:00"
+        },
+        {
+            "channel_id": 3,
+            "channel_name": "暴风资源",
+            "channel_url": "https://bfzyapi.com/api.php/provide/vod/",
+            "channel_status": "1",
+            "channel_sort": "97",
+            "create_time": "2026-05-19 08:00:00",
+            "update_time": "2026-05-19 08:00:00"
+        },
+        {
+            "channel_id": 4,
+            "channel_name": "1080资源库",
+            "channel_url": "https://api.1080zyku.com/inc/apijson.php/",
+            "channel_status": "1",
+            "channel_sort": "96",
+            "create_time": "2026-05-19 08:00:00",
+            "update_time": "2026-05-19 08:00:00"
+        }
+    ],
+    "msg": "success"
+}
