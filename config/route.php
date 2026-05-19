@@ -28,6 +28,10 @@ Route::get('/api/video/type', [IndexController::class, 'getVideoTypes']);
 Route::get('/api/video/search', [IndexController::class, 'searchVideos']);
 Route::get('/api/video/detail', [IndexController::class, 'getVideoDetail']);
 
+// 用户 API 路由
+Route::post('/api/user/login', [IndexController::class, 'userLogin']);
+Route::post('/api/user/register', [IndexController::class, 'userRegister']);
+
 // 登录页面
 Route::get('/admin/login', [AdminController::class, 'loginPage']);
 Route::post('/admin/login', [AdminController::class, 'doLogin']);

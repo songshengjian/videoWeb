@@ -276,6 +276,65 @@ class IndexController
         
         return json(['code' => 0, 'msg' => '视频详情解析失败', 'list' => []]);
     }
+    
+    /**
+     * 用户登录
+     */
+    public function userLogin(Request $request)
+    {
+        $username = $request->post('user_name', '');
+        $password = $request->post('user_pwd', '');
+        
+        if (empty($username) || empty($password)) {
+            return json(['code' => 0, 'msg' => '用户名和密码不能为空']);
+        }
+        
+        // TODO: 实际项目中应该连接数据库验证
+        // 这里暂时返回成功（演示用）
+        return json([
+            'code' => 1,
+            'msg' => '登录成功',
+            'data' => [
+                'user_id' => 1,
+                'user_name' => $username,
+                'token' => bin2hex(random_bytes(32))
+            ]
+        ]);
+    }
+    
+    /**
+     * 用户注册
+     */
+    public function userRegister(Request $request)
+    {
+        $username = $request->post('user_name', '');
+        $password = $request->post('user_pwd', '');
+        $email = $request->post('user_email', '');
+        
+        if (empty($username) || empty($password)) {
+            return json(['code' => 0, 'msg' => '用户名和密码不能为空']);
+        }
+        
+        if (strlen($username) < 3) {
+            return json(['code' => 0, 'msg' => '用户名至少 3 个字符']);
+        }
+        
+        if (strlen($password) < 6) {
+            return json(['code' => 0, 'msg' => '密码至少 6 个字符']);
+        }
+        
+        // TODO: 实际项目中应该连接数据库保存用户
+        // 这里暂时返回成功（演示用）
+        return json([
+            'code' => 1,
+            'msg' => '注册成功',
+            'data' => [
+                'user_id' => 1,
+                'user_name' => $username,
+                'token' => bin2hex(random_bytes(32))
+            ]
+        ]);
+    }
 
     function proxy(Request $request)
     {
