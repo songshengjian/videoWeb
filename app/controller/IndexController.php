@@ -250,8 +250,17 @@ class IndexController
         $totalResults = 0;
         $searchedChannels = [];
         
+        // 支持搜索的频道（其他频道搜索接口返回空）
+        $searchableChannels = ['如意', '魔都', '1080资源库'];
+        
         foreach ($channelList as $channel) {
             if (($channel['channel_status'] ?? '0') != '1') {
+                continue;
+            }
+            
+            $channelName = $channel['channel_name'] ?? '';
+            // 只搜索支持搜索接口的频道
+            if (!in_array($channelName, $searchableChannels, true)) {
                 continue;
             }
             
@@ -264,25 +273,25 @@ class IndexController
                         "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
                         "Accept: application/json",
                     ],
-                    'timeout' => 15,
+                    'timeout' => 8,
                 ]
             ];
             $context = stream_context_create($options);
             $resp = @file_get_contents($url, false, $context);
             
-            if ($resp !== false) {
+            if ($resp !== false && strlen($resp) > 10) {
                 $data = json_decode($resp, true);
                 if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
                     $list = $data['list'] ?? [];
                     if (!empty($list)) {
                         foreach ($list as $item) {
-                            $item['_channel_name'] = $channel['channel_name'];
+                            $item['_channel_name'] = $channelName;
                             $item['_channel_id'] = $channel['channel_id'];
                             $allResults[] = $item;
                         }
                         $totalResults += (int)($data['total'] ?? 0);
-                        $searchedChannels[] = $channel['channel_name'];
                     }
+                    $searchedChannels[] = $channelName;
                 }
             }
         }
