@@ -41,25 +41,40 @@ class IndexController
 
     public function nav(Request $request)
     {
-        $tid = $request->get('tid'); // 接收参数
+        $unifiedTid = (int)$request->get('tid', 0);
         $channelsJson  = VideoUtils::channels();
         $systemName  = VideoUtils::systemName();
         $systemLogo  = VideoUtils::systemLogo();
-        // 转成 PHP 数组
         $channels = json_decode($channelsJson, true);
 
         $info = VideoUtils::getAvailableChannel();
         $useChannel = $info['channel'];
         $vodData    = $info['data'];
+        $classList  = $vodData['class'] ?? [];
         $navData = VideoUtils::getNav($vodData);
+
+        // 判断是否为大类（有子类的大类ID为 1,2,3,4,5）
+        $isParent = in_array($unifiedTid, [1, 2, 3, 4, 5], true);
+        $childTypeIds = [];
+
+        if ($isParent) {
+            // 大类点击：获取所有子类的 channel_type_id
+            $childTypeIds = VideoUtils::getChildrenTypeIds($unifiedTid, $classList);
+        }
+
+        // 查询视频列表
+        $videoList = VideoUtils::getVodList($unifiedTid, $childTypeIds);
         VideoLogUtils::info($navData, 'nav:分类');
 
-        $videoList = VideoUtils::getVodList($tid);
-        VideoLogUtils::info($videoList['code'], '视频列表Code /n');
-        VideoLogUtils::info($videoList['msg'], '视频列表Msg /n');
-        VideoLogUtils::info($videoList['list'], '视频列表具体数据 /n');
-        // 打日志看看拿到的数据
-        return view('index/nav', ['channels' => $channels, 'systemName' => $systemName, 'systemLogo' => $systemLogo, 'navItemShow' => $navData['navItemShow'], 'navItemMore' => $navData['navItemMore'], 'videoData' => $videoList]);
+        return view('index/nav', [
+            'channels' => $channels,
+            'systemName' => $systemName,
+            'systemLogo' => $systemLogo,
+            'navItemShow' => $navData['navItemShow'],
+            'navItemMore' => $navData['navItemMore'],
+            'navData' => $navData,
+            'videoData' => $videoList,
+        ]);
     }
 
     public function search(Request $request)

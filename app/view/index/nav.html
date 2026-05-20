@@ -19,21 +19,38 @@
         /* 广告样式由 /ads/ads.css 提供 */
 
         /* Header */
-        .header {position: sticky; top:5px; z-index:1000; background:#fff; padding:15px 0; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+        .header {position: sticky; top:0; z-index:100; background:#fff; padding:12px 0; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
         .header-container {max-width:1200px; margin:0 auto; display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:20px; padding:0 20px;}
         .logo {font-size:28px; font-weight:bold; color:#16a34a; text-decoration:none;}
-        .nav-dropdown {display:flex; gap:15px; justify-content:center; flex:1; overflow:hidden; position:relative; z-index:1001;}
-        .nav-item, .nav-dropdown-item {padding:8px 16px; border-radius:20px; text-decoration:none; font-size:14px; color:#333; transition:0.3s; white-space:nowrap;}
+        .nav-dropdown {display:flex; gap:8px; justify-content:center; flex:1; overflow-x:auto; position:relative;}
+        .nav-dropdown::-webkit-scrollbar {display:none;}
+        .nav-item, .nav-dropdown-item {padding:8px 16px; border-radius:20px; text-decoration:none; font-size:14px; color:#333; transition:0.3s; white-space:nowrap; display:inline-flex; align-items:center;}
         .nav-item {pointer-events:auto; cursor:pointer;}
         .nav-item.active, .nav-dropdown-item.active {background: linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
-        .nav-category {position:relative; flex-shrink:1; min-width:0;}
-        .nav-submenu {display:none; position:absolute; top:100%; left:50%; transform:translateX(-50%); background:#fff; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.15); padding:10px 0; z-index:1002; min-width:140px;}
-        .nav-submenu::before {content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:12px; height:6px; background:#fff; clip-path:polygon(0 100%, 50% 0, 100% 100%);}
-        .nav-submenu .nav-dropdown-item {display:block; padding:8px 16px; color:#333; text-decoration:none; font-size:13px; white-space:nowrap; transition:0.2s;}
+        
+        /* 分类容器 */
+        .nav-category {position:relative; flex-shrink:0;}
+        
+        /* 子菜单 - 固定在 header 下方 */
+        .nav-submenu {
+            display:none; 
+            position:absolute; 
+            top:100%; 
+            left:0; 
+            background:#fff; 
+            border-radius:8px; 
+            box-shadow:0 8px 24px rgba(0,0,0,0.15); 
+            padding:8px 0; 
+            z-index:200; 
+            min-width:130px;
+            margin-top:8px;
+        }
+        .nav-submenu .nav-dropdown-item {display:block; padding:10px 16px; color:#333; text-decoration:none; font-size:13px; white-space:nowrap; transition:0.2s; width:100%;}
         .nav-submenu .nav-dropdown-item:hover {background:linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
         .nav-submenu .nav-dropdown-item.active {background:linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
-        .nav-category:hover .nav-submenu {display:block;}
-        .nav-item.active, .nav-dropdown-item.active {background: linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
+        
+        /* 点击显示子菜单 */
+        .nav-category.open .nav-submenu {display:block;}
         .search-box {position:relative; flex-shrink:0;}
         .search-input {width:250px; padding:10px 40px 10px 15px; border:2px solid #ccc; border-radius:25px; outline:none; transition:0.3s;}
         .search-input:focus {border-color:#16a34a; box-shadow:0 0 8px rgba(34,197,94,0.3);}
@@ -83,8 +100,8 @@
 
                 {foreach $navItemShow as $navItem}
                     {if $navItem.has_children && $navItem.parent_id === 0}
-                    <div class="nav-category">
-                        <a href="/index/nav?tid={$navItem.type_id}" class="nav-item {$navItem.active?'active':''}">
+                    <div class="nav-category" id="cat-{$navItem.type_id}">
+                        <a href="javascript:void(0)" class="nav-item {$navItem.active?'active':''}" onclick="toggleSubmenu({$navItem.type_id})">
                             {$navItem.type_name} ▼
                         </a>
                         <div class="nav-submenu">
@@ -154,14 +171,29 @@
 
 <script src="/ads/ads.js"></script>
 <script>
-document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-        const href = item.getAttribute('href');
-        if (href) {
-            window.location.href = href;
+// 切换子菜单
+function toggleSubmenu(catId) {
+    const cat = document.getElementById('cat-' + catId);
+    const allCats = document.querySelectorAll('.nav-category');
+    
+    // 关闭其他已打开的子菜单
+    allCats.forEach(c => {
+        if (c.id !== 'cat-' + catId) {
+            c.classList.remove('open');
         }
     });
+    
+    // 切换当前子菜单
+    cat.classList.toggle('open');
+}
+
+// 点击外部关闭子菜单
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.nav-category')) {
+        document.querySelectorAll('.nav-category').forEach(c => c.classList.remove('open'));
+    }
 });
+
 function playVideo(vod_name){
     window.location.href = '/index/search?keyword='+encodeURIComponent(vod_name);
 }

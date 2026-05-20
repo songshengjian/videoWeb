@@ -146,6 +146,20 @@ class VideoUtils
         return $result;
     }
 
+    // 获取大类下所有子类的 channel_type_id 列表
+    public static function getChildrenTypeIds(int $unifiedParentId, array $channelClasses): array
+    {
+        $children = self::getChildrenCategories($unifiedParentId);
+        $typeIds = [];
+        foreach ($children as $child) {
+            $resolvedId = self::resolveTypeId($child['type_id'], $channelClasses);
+            if ($resolvedId > 0) {
+                $typeIds[] = $resolvedId;
+            }
+        }
+        return $typeIds;
+    }
+
     private static function defaultChannelsData(): array
     {
         return [
@@ -407,7 +421,7 @@ class VideoUtils
     {
         return ['伦理片', '限制级', '少儿不宜','伦理','限制','不宜'];
     }
-    public static function getVodList($unifiedTid): ?array
+    public static function getVodList(int $unifiedTid = 0, array $childTypeIds = []): ?array
     {
         $cacheKey = 'useChannel';
         $channel = Cache::get($cacheKey);
@@ -415,9 +429,14 @@ class VideoUtils
         $vodData = Cache::get($cacheNavKey);
         $classList = $vodData['class'] ?? [];
 
+        // 如果有子类ID（大类聚合查询）
+        if (!empty($childTypeIds)) {
+            return self::aggregateChildCategories($channel, $childTypeIds);
+        }
+
         $channelTid = 0;
         if ($unifiedTid > 0) {
-            $channelTid = self::resolveTypeId((int)$unifiedTid, $classList);
+            $channelTid = self::resolveTypeId($unifiedTid, $classList);
         }
 
         $apiUrl = rtrim($channel['channel_url'], '/') . '?ac=detail';
@@ -443,6 +462,52 @@ class VideoUtils
             return $data;
         }
         return null;
+    }
+
+    // 聚合多个子类的数据
+    private static function aggregateChildCategories(array $channel, array $typeIds): ?array
+    {
+        $allList = [];
+        $total = 0;
+
+        foreach ($typeIds as $typeId) {
+            $apiUrl = rtrim($channel['channel_url'], '/') . '?ac=detail&t=' . $typeId . '&pg=1&limit=20';
+            $options = [
+                'http' => [
+                    'method'  => 'GET',
+                    'header'  => [
+                        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                        "Accept: application/json",
+                    ],
+                    'timeout' => 10,
+                ]
+            ];
+            $context = stream_context_create($options);
+            $resp = @file_get_contents($apiUrl, false, $context);
+
+            if ($resp !== false) {
+                $data = json_decode($resp, true);
+                if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
+                    $list = $data['list'] ?? [];
+                    $allList = array_merge($allList, $list);
+                    $total += (int)($data['total'] ?? 0);
+                }
+            }
+        }
+
+        // 按时间排序（假设 vod_time_add 是时间戳）
+        usort($allList, function($a, $b) {
+            return ($b['vod_time_add'] ?? 0) <=> ($a['vod_time_add'] ?? 0);
+        });
+
+        return [
+            'code' => 1,
+            'msg' => '数据列表',
+            'list' => array_slice($allList, 0, 20),
+            'total' => $total,
+            'page' => 1,
+            'pagecount' => 1,
+        ];
     }
     public static function getVodDetail($channelUrl,$ids): ?array
     {

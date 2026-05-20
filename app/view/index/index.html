@@ -126,44 +126,32 @@
         /* 分类下拉菜单 */
         .nav-category {
             position: relative;
-            flex-shrink: 1;
-            min-width: 0;
+            flex-shrink: 0;
         }
 
         .nav-submenu {
             display: none;
             position: absolute;
             top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 0;
             background: white;
-            border-radius: 10px;
+            border-radius: 8px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            padding: 10px 0;
-            z-index: 1002;
-            min-width: 140px;
-        }
-
-        .nav-submenu::before {
-            content: '';
-            position: absolute;
-            top: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 12px;
-            height: 6px;
-            background: white;
-            clip-path: polygon(0 100%, 50% 0, 100% 100%);
+            padding: 8px 0;
+            z-index: 200;
+            min-width: 130px;
+            margin-top: 8px;
         }
 
         .nav-submenu .nav-dropdown-item {
             display: block;
-            padding: 8px 16px;
+            padding: 10px 16px;
             color: #333;
             text-decoration: none;
             font-size: 13px;
             white-space: nowrap;
             transition: all 0.2s ease;
+            width: 100%;
         }
 
         .nav-submenu .nav-dropdown-item:hover {
@@ -176,8 +164,8 @@
             color: white;
         }
 
-        /* 鼠标悬停显示子菜单 */
-        .nav-category:hover .nav-submenu {
+        /* 点击显示子菜单 */
+        .nav-category.open .nav-submenu {
             display: block;
         }
 
@@ -537,11 +525,10 @@
                 <div class="nav-main-items">
                     <a href="/index/index" class="nav-item">首页</a>
 
-                    <!-- 大类：带子菜单 -->
                     {foreach $navItemShow as $navItem}
                         {if $navItem.has_children && $navItem.parent_id === 0}
-                        <div class="nav-category" data-type-id="{$navItem.type_id}">
-                            <a href="/index/nav?tid={$navItem.type_id}" class="nav-item">
+                        <div class="nav-category" id="cat-{$navItem.type_id}">
+                            <a href="javascript:void(0)" class="nav-item {$navItem.active?'active':''}" onclick="toggleSubmenu({$navItem.type_id})">
                                 {$navItem.type_name} ▼
                             </a>
                             <div class="nav-submenu">
@@ -549,7 +536,7 @@
                                     {foreach $navData.hierarchical as $parentCat}
                                         {if $parentCat.type_id == $navItem.type_id && !empty($parentCat.children)}
                                             {foreach $parentCat.children as $child}
-                                            <a href="/index/nav?tid={$child.type_id}" class="nav-dropdown-item">{$child.type_name}</a>
+                                            <a href="/index/nav?tid={$child.type_id}" class="nav-dropdown-item {$child.active?'active':''}">{$child.type_name}</a>
                                             {/foreach}
                                         {/if}
                                     {/foreach}
@@ -563,23 +550,6 @@
                         {/if}
                     {/foreach}
                 </div>
-
-                <!--            {if !empty($navItemMore)}-->
-                <div class="nav-more">
-                    <a class="nav-more-btn">更多 ▼</a>
-                    <div class="nav-more-dropdown">
-                        {foreach $navItemMore as $navItem}
-                        <a href="/index/nav?tid={$navItem.type_id}"
-                            class="nav-dropdown-item {$navItem.active ? 'active' : ''}">
-                            {$navItem.type_name} (ID: {$navItem.type_id})
-                        </a>
-                        {/foreach}
-                        <a href="/VideoApp.apk" class="nav-dropdown-item" style="color: #16a34a; font-weight: bold;">
-                            📱 下载 APP
-                        </a>
-                    </div>
-                </div>
-                <!--            {/if}-->
             </nav>
 
             <!-- 下载 APP 按钮 -->
@@ -671,6 +641,27 @@
                     this.classList.add('active');
                 });
             });
+        });
+
+        // 切换子菜单
+        function toggleSubmenu(catId) {
+            const cat = document.getElementById('cat-' + catId);
+            const allCats = document.querySelectorAll('.nav-category');
+            
+            allCats.forEach(c => {
+                if (c.id !== 'cat-' + catId) {
+                    c.classList.remove('open');
+                }
+            });
+            
+            cat.classList.toggle('open');
+        }
+
+        // 点击外部关闭子菜单
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.nav-category')) {
+                document.querySelectorAll('.nav-category').forEach(c => c.classList.remove('open'));
+            }
         });
 
         // 动态加载广告函数
