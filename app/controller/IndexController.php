@@ -350,19 +350,6 @@ class IndexController
         
         return $results;
     }
-            
-            $results[] = [
-                'vod_id' => $vodId,
-                'vod_name' => $vodName,
-                'type_name' => $type,
-                '_channel_name' => $channelName,
-                '_channel_id' => $channelId,
-                '_is_web_search' => true,
-            ];
-        }
-        
-        return $results;
-    }
     
     /**
      * 获取视频详情
