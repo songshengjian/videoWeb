@@ -155,33 +155,18 @@ class IndexController
         $vodData = $info['data'];
         $classList = $vodData['class'] ?? [];
         
-        $channelTypeId = 0;
-        if ($unifiedTypeId > 0) {
-            $channelTypeId = VideoUtils::resolveTypeId($unifiedTypeId, $classList);
+        // 判断是否为大类（有子类的大类ID为 1,2,3,4,5）
+        $isParent = in_array($unifiedTypeId, [1, 2, 3, 4, 5], true);
+        $childTypeIds = [];
+
+        if ($isParent) {
+            $childTypeIds = VideoUtils::getChildrenTypeIds($unifiedTypeId, $classList);
         }
 
-        $apiUrl = rtrim($channel['channel_url'], '/') . '/?ac=detail' . ($channelTypeId > 0 ? '&t=' . $channelTypeId : '') . '&pg=' . $page . '&limit=' . $limit;
+        $videoList = VideoUtils::getVodList($unifiedTypeId, $childTypeIds);
         
-        $options = [
-            'http' => [
-                'method'  => 'GET',
-                'header'  => [
-                    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                    "Accept: application/json",
-                ],
-                'timeout' => 30,
-            ]
-        ];
-        $context = stream_context_create($options);
-        $resp = @file_get_contents($apiUrl, false, $context);
-        
-        if ($resp === false) {
-            return json(['code' => 0, 'msg' => '获取视频列表失败', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
-        }
-        
-        $data = json_decode($resp, true);
-        if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
-            return json($data);
+        if ($videoList) {
+            return json($videoList);
         }
         
         return json(['code' => 0, 'msg' => '数据解析失败', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
