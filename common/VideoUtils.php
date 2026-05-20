@@ -4,6 +4,89 @@ namespace common;
 use support\Cache;
 class VideoUtils
 {
+    // 通用分类体系（固定ID，所有渠道统一）
+    private static $unifiedCategories = [
+        ['type_id' => 1, 'type_name' => '电影'],
+        ['type_id' => 2, 'type_name' => '连续剧'],
+        ['type_id' => 3, 'type_name' => '综艺'],
+        ['type_id' => 4, 'type_name' => '动漫'],
+        ['type_id' => 5, 'type_name' => '动作片'],
+        ['type_id' => 6, 'type_name' => '喜剧片'],
+        ['type_id' => 7, 'type_name' => '爱情片'],
+        ['type_id' => 8, 'type_name' => '科幻片'],
+        ['type_id' => 9, 'type_name' => '恐怖片'],
+        ['type_id' => 10, 'type_name' => '剧情片'],
+        ['type_id' => 11, 'type_name' => '战争片'],
+        ['type_id' => 12, 'type_name' => '国产剧'],
+        ['type_id' => 13, 'type_name' => '香港剧'],
+        ['type_id' => 14, 'type_name' => '台湾剧'],
+        ['type_id' => 15, 'type_name' => '韩国剧'],
+        ['type_id' => 16, 'type_name' => '日本剧'],
+        ['type_id' => 17, 'type_name' => '欧美剧'],
+        ['type_id' => 18, 'type_name' => '大陆综艺'],
+        ['type_id' => 19, 'type_name' => '港台综艺'],
+        ['type_id' => 20, 'type_name' => '日韩综艺'],
+        ['type_id' => 21, 'type_name' => '欧美综艺'],
+        ['type_id' => 22, 'type_name' => '国产动漫'],
+        ['type_id' => 23, 'type_name' => '日韩动漫'],
+        ['type_id' => 24, 'type_name' => '欧美动漫'],
+        ['type_id' => 25, 'type_name' => '短剧'],
+    ];
+
+    // 通用分类到各渠道分类名称的映射
+    private static $categoryNameMap = [
+        '电影' => ['电影片', '电影'],
+        '连续剧' => ['连续剧', '电视剧'],
+        '综艺' => ['综艺片', '综艺'],
+        '动漫' => ['动漫片', '动漫'],
+        '动作片' => ['动作片'],
+        '喜剧片' => ['喜剧片'],
+        '爱情片' => ['爱情片'],
+        '科幻片' => ['科幻片'],
+        '恐怖片' => ['恐怖片'],
+        '剧情片' => ['剧情片'],
+        '战争片' => ['战争片'],
+        '国产剧' => ['国产剧'],
+        '香港剧' => ['香港剧', '港台剧'],
+        '台湾剧' => ['台湾剧'],
+        '韩国剧' => ['韩国剧', '韩剧'],
+        '日本剧' => ['日本剧', '日剧'],
+        '欧美剧' => ['欧美剧', '欧美剧'],
+        '大陆综艺' => ['大陆综艺'],
+        '港台综艺' => ['港台综艺'],
+        '日韩综艺' => ['日韩综艺'],
+        '欧美综艺' => ['欧美综艺'],
+        '国产动漫' => ['国产动漫'],
+        '日韩动漫' => ['日韩动漫'],
+        '欧美动漫' => ['欧美动漫'],
+        '短剧' => ['短剧', '爽文短剧', '短剧大全'],
+    ];
+
+    // 获取通用分类列表
+    public static function getUnifiedCategories(): array
+    {
+        return self::$unifiedCategories;
+    }
+
+    // 将通用分类ID转换为渠道实际分类ID
+    public static function resolveTypeId(int $unifiedTypeId, array $channelClasses): int
+    {
+        $unified = self::$unifiedCategories[$unifiedTypeId - 1] ?? null;
+        if (!$unified) return $unifiedTypeId;
+
+        $unifiedName = $unified['type_name'];
+        $aliases = self::$categoryNameMap[$unifiedName] ?? [$unifiedName];
+
+        foreach ($channelClasses as $class) {
+            $name = $class['type_name'] ?? '';
+            $id = (int)($class['type_id'] ?? 0);
+            if (in_array($name, $aliases, true)) {
+                return $id;
+            }
+        }
+        return 0;
+    }
+
     private static function defaultChannelsData(): array
     {
         return [
@@ -222,44 +305,64 @@ class VideoUtils
     }
     public static function getNav($vodData): array
     {
-        $blacklist = VideoUtils::blacklist();
         $vodArray = is_string($vodData) ? json_decode($vodData, true) : $vodData;
         $classList = $vodArray['class'] ?? [];
-        $classList = array_reverse(array_values(array_filter($classList, function ($item) use ($blacklist) {
-            return !in_array($item['type_name'] ?? '', $blacklist, true);
-        })));
-        $navItemShow = array_slice($classList, 0, 5)??[];      // 前 5 条
-        $navItemMore = array_slice($classList, 5)??[];         // 剩余
-        return ['navItemShow'=>$navItemShow,'navItemMore'=>$navItemMore];
+
+        $unifiedCats = self::getUnifiedCategories();
+        $resolvedCats = [];
+
+        foreach ($unifiedCats as $cat) {
+            $resolvedId = self::resolveTypeId($cat['type_id'], $classList);
+            if ($resolvedId > 0) {
+                $resolvedCats[] = [
+                    'type_id' => $cat['type_id'],
+                    'type_name' => $cat['type_name'],
+                    'channel_type_id' => $resolvedId,
+                ];
+            }
+        }
+
+        $navItemShow = array_slice($resolvedCats, 0, 8);
+        $navItemMore = array_slice($resolvedCats, 8);
+        return ['navItemShow' => $navItemShow, 'navItemMore' => $navItemMore];
     }
     public static function blacklist(): array
     {
         return ['伦理片', '限制级', '少儿不宜','伦理','限制','不宜'];
     }
-    public static function getVodList($tid): ?array
+    public static function getVodList($unifiedTid): ?array
     {
         $cacheKey = 'useChannel';
         $channel = Cache::get($cacheKey);
-        $url = rtrim($channel['channel_url'], '/') . '?ac=detail&t='.$tid;
+        $cacheNavKey = 'useNav';
+        $vodData = Cache::get($cacheNavKey);
+        $classList = $vodData['class'] ?? [];
+
+        $channelTid = 0;
+        if ($unifiedTid > 0) {
+            $channelTid = self::resolveTypeId((int)$unifiedTid, $classList);
+        }
+
+        $apiUrl = rtrim($channel['channel_url'], '/') . '?ac=detail';
+        if ($channelTid > 0) {
+            $apiUrl .= '&t=' . $channelTid;
+        }
+
         $options = [
             'http' => [
                 'method'  => 'GET',
                 'header'  => [
                     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
                     "Accept: application/json",
-                    "Authorization: Bearer your_token_here"
                 ],
-                'timeout' => 10, // 超时秒数
+                'timeout' => 15,
             ]
         ];
         $context = stream_context_create($options);
-        $resp = @file_get_contents($url,false,$context);
+        $resp = @file_get_contents($apiUrl, false, $context);
 
         $data = json_decode($resp, true);
         if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
-            VideoLogUtils::info($data['list'],'视频列表\n');
-            VideoLogUtils::info($data['code'],'视频列表Code /n');
-            VideoLogUtils::info($data['msg'],'视频列表Msg /n');
             return $data;
         }
         return null;

@@ -129,7 +129,7 @@ class IndexController
     {
         $page = (int)$request->get('page', 1);
         $limit = (int)$request->get('limit', 20);
-        $typeId = (int)$request->get('type_id', 0);
+        $unifiedTypeId = (int)$request->get('type_id', 0);
         
         $info = VideoUtils::getAvailableChannel();
         if (!$info) {
@@ -137,7 +137,15 @@ class IndexController
         }
         
         $channel = $info['channel'];
-        $url = rtrim($channel['channel_url'], '/') . '/?ac=detail' . ($typeId > 0 ? '&t=' . $typeId : '') . '&pg=' . $page . '&limit=' . $limit;
+        $vodData = $info['data'];
+        $classList = $vodData['class'] ?? [];
+        
+        $channelTypeId = 0;
+        if ($unifiedTypeId > 0) {
+            $channelTypeId = VideoUtils::resolveTypeId($unifiedTypeId, $classList);
+        }
+
+        $apiUrl = rtrim($channel['channel_url'], '/') . '/?ac=detail' . ($channelTypeId > 0 ? '&t=' . $channelTypeId : '') . '&pg=' . $page . '&limit=' . $limit;
         
         $options = [
             'http' => [
@@ -150,7 +158,7 @@ class IndexController
             ]
         ];
         $context = stream_context_create($options);
-        $resp = @file_get_contents($url, false, $context);
+        $resp = @file_get_contents($apiUrl, false, $context);
         
         if ($resp === false) {
             return json(['code' => 0, 'msg' => '获取视频列表失败', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
@@ -161,12 +169,11 @@ class IndexController
             return json($data);
         }
         
-        // 解析失败，返回原始数据但标记错误
         return json(['code' => 0, 'msg' => '数据解析失败', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
     }
     
     /**
-     * 获取视频分类列表
+     * 获取视频分类列表（返回通用分类）
      */
     public function getVideoTypes(Request $request)
     {
@@ -176,15 +183,22 @@ class IndexController
         }
         
         $vodData = $info['data'];
-        $class = $vodData['class'] ?? [];
+        $classList = $vodData['class'] ?? [];
         
-        // 过滤黑名单
-        $blacklist = VideoUtils::blacklist();
-        $class = array_filter($class, function ($item) use ($blacklist) {
-            return !in_array($item['type_name'] ?? '', $blacklist, true);
-        });
+        $unifiedCats = VideoUtils::getUnifiedCategories();
+        $resolvedCats = [];
         
-        return json(['code' => 1, 'msg' => 'success', 'class' => array_values($class)]);
+        foreach ($unifiedCats as $cat) {
+            $resolvedId = VideoUtils::resolveTypeId($cat['type_id'], $classList);
+            if ($resolvedId > 0) {
+                $resolvedCats[] = [
+                    'type_id' => $cat['type_id'],
+                    'type_name' => $cat['type_name'],
+                ];
+            }
+        }
+        
+        return json(['code' => 1, 'msg' => 'success', 'class' => $resolvedCats]);
     }
     
     /**
