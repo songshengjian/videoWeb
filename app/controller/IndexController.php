@@ -345,17 +345,37 @@ class IndexController
     {
         $results = [];
         
-        // 匹配搜索结果项：<li><span class="xing_vb4"><a ... href="/index.php/vod/detail/id/XXX.html">名称</a></span><span class="xing_vb5">类别</span>...
-        preg_match_all('/<li>\s*<span class="xing_vb4"><a[^>]*href="[^"]*\/vod\/detail\/id\/([^"]+)"[^>]*>([^<]+)<\/a>.*?<span class="xing_vb5">([^<]*)<\/span>/s', $html, $matches, PREG_SET_ORDER);
+        // 匹配搜索结果项：
+        // <span class="xing_vb4"><a ... href="/index.php/vod/detail/id/XXX.html?ac=detail">名称<em>...</em></a></span><span class="xing_vb5">类别</span>
+        preg_match_all('/<span class="xing_vb4"[^>]*><a[^>]*href="[^"]*\/vod\/detail\/id\/([^"?]+)/', $html, $idMatches, PREG_SET_ORDER);
+        // 名称在 <a> 和 </a> 之间，可能包含 <em> 标签
+        preg_match_all('/<span class="xing_vb4"[^>]*><a[^>]*>(.*?)</a>/', $html, $rawNameMatches, PREG_SET_ORDER);
+        preg_match_all('/<span class="xing_vb5">([^<]*)</', $html, $typeMatches, PREG_SET_ORDER);
         
-        foreach ($matches as $match) {
-            $vodId = $match[1];
-            $vodName = trim($match[2]);
-            $type = trim($match[3]);
+        $count = min(count($idMatches), count($rawNameMatches));
+        for ($i = 0; $i < $count; $i++) {
+            $vodId = $idMatches[$i][1];
+            // 移除 HTML 标签获取纯文本名称
+            $rawName = $rawNameMatches[$i][1];
+            $vodName = trim(strip_tags($rawName));
+            $type = isset($typeMatches[$i]) ? trim($typeMatches[$i][1]) : '';
             
             if (empty($vodName)) {
                 continue;
             }
+            
+            $results[] = [
+                'vod_id' => $vodId,
+                'vod_name' => $vodName,
+                'type_name' => $type,
+                '_channel_name' => $channelName,
+                '_channel_id' => $channelId,
+                '_is_web_search' => true,
+            ];
+        }
+        
+        return $results;
+    }
             
             $results[] = [
                 'vod_id' => $vodId,
