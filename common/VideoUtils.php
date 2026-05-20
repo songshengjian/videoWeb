@@ -4,33 +4,34 @@ namespace common;
 use support\Cache;
 class VideoUtils
 {
-    // 通用分类体系（固定ID，所有渠道统一）
+    // 通用分类体系（两级结构：大类 -> 子类）
+    // 大类：ID 1-9，子类：ID = 大类ID * 100 + 序号
     private static $unifiedCategories = [
-        ['type_id' => 1, 'type_name' => '电影'],
-        ['type_id' => 2, 'type_name' => '连续剧'],
-        ['type_id' => 3, 'type_name' => '综艺'],
-        ['type_id' => 4, 'type_name' => '动漫'],
-        ['type_id' => 5, 'type_name' => '动作片'],
-        ['type_id' => 6, 'type_name' => '喜剧片'],
-        ['type_id' => 7, 'type_name' => '爱情片'],
-        ['type_id' => 8, 'type_name' => '科幻片'],
-        ['type_id' => 9, 'type_name' => '恐怖片'],
-        ['type_id' => 10, 'type_name' => '剧情片'],
-        ['type_id' => 11, 'type_name' => '战争片'],
-        ['type_id' => 12, 'type_name' => '国产剧'],
-        ['type_id' => 13, 'type_name' => '香港剧'],
-        ['type_id' => 14, 'type_name' => '台湾剧'],
-        ['type_id' => 15, 'type_name' => '韩国剧'],
-        ['type_id' => 16, 'type_name' => '日本剧'],
-        ['type_id' => 17, 'type_name' => '欧美剧'],
-        ['type_id' => 18, 'type_name' => '大陆综艺'],
-        ['type_id' => 19, 'type_name' => '港台综艺'],
-        ['type_id' => 20, 'type_name' => '日韩综艺'],
-        ['type_id' => 21, 'type_name' => '欧美综艺'],
-        ['type_id' => 22, 'type_name' => '国产动漫'],
-        ['type_id' => 23, 'type_name' => '日韩动漫'],
-        ['type_id' => 24, 'type_name' => '欧美动漫'],
-        ['type_id' => 25, 'type_name' => '短剧'],
+        ['type_id' => 1, 'type_name' => '电影', 'parent_id' => 0],
+        ['type_id' => 101, 'type_name' => '动作片', 'parent_id' => 1],
+        ['type_id' => 102, 'type_name' => '喜剧片', 'parent_id' => 1],
+        ['type_id' => 103, 'type_name' => '爱情片', 'parent_id' => 1],
+        ['type_id' => 104, 'type_name' => '科幻片', 'parent_id' => 1],
+        ['type_id' => 105, 'type_name' => '恐怖片', 'parent_id' => 1],
+        ['type_id' => 106, 'type_name' => '剧情片', 'parent_id' => 1],
+        ['type_id' => 107, 'type_name' => '战争片', 'parent_id' => 1],
+        ['type_id' => 2, 'type_name' => '连续剧', 'parent_id' => 0],
+        ['type_id' => 201, 'type_name' => '国产剧', 'parent_id' => 2],
+        ['type_id' => 202, 'type_name' => '香港剧', 'parent_id' => 2],
+        ['type_id' => 203, 'type_name' => '台湾剧', 'parent_id' => 2],
+        ['type_id' => 204, 'type_name' => '韩国剧', 'parent_id' => 2],
+        ['type_id' => 205, 'type_name' => '日本剧', 'parent_id' => 2],
+        ['type_id' => 206, 'type_name' => '欧美剧', 'parent_id' => 2],
+        ['type_id' => 3, 'type_name' => '综艺', 'parent_id' => 0],
+        ['type_id' => 301, 'type_name' => '大陆综艺', 'parent_id' => 3],
+        ['type_id' => 302, 'type_name' => '港台综艺', 'parent_id' => 3],
+        ['type_id' => 303, 'type_name' => '日韩综艺', 'parent_id' => 3],
+        ['type_id' => 304, 'type_name' => '欧美综艺', 'parent_id' => 3],
+        ['type_id' => 4, 'type_name' => '动漫', 'parent_id' => 0],
+        ['type_id' => 401, 'type_name' => '国产动漫', 'parent_id' => 4],
+        ['type_id' => 402, 'type_name' => '日韩动漫', 'parent_id' => 4],
+        ['type_id' => 403, 'type_name' => '欧美动漫', 'parent_id' => 4],
+        ['type_id' => 5, 'type_name' => '短剧', 'parent_id' => 0],
     ];
 
     // 通用分类到各渠道分类名称的映射
@@ -68,10 +69,31 @@ class VideoUtils
         return self::$unifiedCategories;
     }
 
+    // 获取大类（一级分类）
+    public static function getParentCategories(): array
+    {
+        return array_values(array_filter(self::$unifiedCategories, function($cat) {
+            return $cat['parent_id'] === 0;
+        }));
+    }
+
+    // 获取某个大类的子类
+    public static function getChildrenCategories(int $parentId): array
+    {
+        return array_values(array_filter(self::$unifiedCategories, function($cat) use ($parentId) {
+            return $cat['parent_id'] === $parentId;
+        }));
+    }
+
     // 将通用分类ID转换为渠道实际分类ID
     public static function resolveTypeId(int $unifiedTypeId, array $channelClasses): int
     {
-        $unified = self::$unifiedCategories[$unifiedTypeId - 1] ?? null;
+        $unified = self::$unifiedCategories[array_search(
+            $unifiedTypeId,
+            array_column(self::$unifiedCategories, 'type_id'),
+            true
+        )] ?? null;
+
         if (!$unified) return $unifiedTypeId;
 
         $unifiedName = $unified['type_name'];
@@ -85,6 +107,43 @@ class VideoUtils
             }
         }
         return 0;
+    }
+
+    // 获取带层级结构的导航数据
+    public static function getHierarchicalNav(array $channelClasses): array
+    {
+        $parents = self::getParentCategories();
+        $result = [];
+
+        foreach ($parents as $parent) {
+            $parentEntry = [
+                'type_id' => $parent['type_id'],
+                'type_name' => $parent['type_name'],
+                'parent_id' => 0,
+                'channel_type_id' => self::resolveTypeId($parent['type_id'], $channelClasses),
+                'children' => [],
+            ];
+
+            $children = self::getChildrenCategories($parent['type_id']);
+            foreach ($children as $child) {
+                $resolvedId = self::resolveTypeId($child['type_id'], $channelClasses);
+                if ($resolvedId > 0) {
+                    $parentEntry['children'][] = [
+                        'type_id' => $child['type_id'],
+                        'type_name' => $child['type_name'],
+                        'parent_id' => $child['parent_id'],
+                        'channel_type_id' => $resolvedId,
+                    ];
+                }
+            }
+
+            // 只有大类本身有效，或者至少有一个子类有效时才加入
+            if ($parentEntry['channel_type_id'] > 0 || !empty($parentEntry['children'])) {
+                $result[] = $parentEntry;
+            }
+        }
+
+        return $result;
     }
 
     private static function defaultChannelsData(): array
@@ -308,23 +367,41 @@ class VideoUtils
         $vodArray = is_string($vodData) ? json_decode($vodData, true) : $vodData;
         $classList = $vodArray['class'] ?? [];
 
-        $unifiedCats = self::getUnifiedCategories();
-        $resolvedCats = [];
+        // 获取层级结构数据
+        $hierarchical = self::getHierarchicalNav($classList);
 
-        foreach ($unifiedCats as $cat) {
-            $resolvedId = self::resolveTypeId($cat['type_id'], $classList);
-            if ($resolvedId > 0) {
-                $resolvedCats[] = [
-                    'type_id' => $cat['type_id'],
-                    'type_name' => $cat['type_name'],
-                    'channel_type_id' => $resolvedId,
+        // 扁平化用于导航栏展示
+        $flatItems = [];
+        foreach ($hierarchical as $parent) {
+            // 添加大类本身
+            if ($parent['channel_type_id'] > 0) {
+                $flatItems[] = [
+                    'type_id' => $parent['type_id'],
+                    'type_name' => $parent['type_name'],
+                    'parent_id' => 0,
+                    'has_children' => !empty($parent['children']),
+                ];
+            }
+            // 添加子类
+            foreach ($parent['children'] as $child) {
+                $flatItems[] = [
+                    'type_id' => $child['type_id'],
+                    'type_name' => $child['type_name'],
+                    'parent_id' => $child['parent_id'],
+                    'has_children' => false,
                 ];
             }
         }
 
-        $navItemShow = array_slice($resolvedCats, 0, 8);
-        $navItemMore = array_slice($resolvedCats, 8);
-        return ['navItemShow' => $navItemShow, 'navItemMore' => $navItemMore];
+        // 前 8 个作为主导航，其余放"更多"
+        $navItemShow = array_slice($flatItems, 0, 8);
+        $navItemMore = array_slice($flatItems, 8);
+
+        return [
+            'navItemShow' => $navItemShow,
+            'navItemMore' => $navItemMore,
+            'hierarchical' => $hierarchical,
+        ];
     }
     public static function blacklist(): array
     {

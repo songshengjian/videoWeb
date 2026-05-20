@@ -185,20 +185,33 @@ class IndexController
         $vodData = $info['data'];
         $classList = $vodData['class'] ?? [];
         
-        $unifiedCats = VideoUtils::getUnifiedCategories();
-        $resolvedCats = [];
+        // 返回层级结构
+        $hierarchical = VideoUtils::getHierarchicalNav($classList);
         
-        foreach ($unifiedCats as $cat) {
-            $resolvedId = VideoUtils::resolveTypeId($cat['type_id'], $classList);
-            if ($resolvedId > 0) {
-                $resolvedCats[] = [
-                    'type_id' => $cat['type_id'],
-                    'type_name' => $cat['type_name'],
+        $flatCats = [];
+        foreach ($hierarchical as $parent) {
+            if ($parent['channel_type_id'] > 0) {
+                $flatCats[] = [
+                    'type_id' => $parent['type_id'],
+                    'type_name' => $parent['type_name'],
+                    'parent_id' => 0,
+                ];
+            }
+            foreach ($parent['children'] as $child) {
+                $flatCats[] = [
+                    'type_id' => $child['type_id'],
+                    'type_name' => $child['type_name'],
+                    'parent_id' => $child['parent_id'],
                 ];
             }
         }
         
-        return json(['code' => 1, 'msg' => 'success', 'class' => $resolvedCats]);
+        return json([
+            'code' => 1,
+            'msg' => 'success',
+            'class' => $flatCats,
+            'tree' => $hierarchical,
+        ]);
     }
     
     /**
