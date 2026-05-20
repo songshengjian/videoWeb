@@ -97,14 +97,21 @@ class IndexController
         $keyword = $request->get('keyword', '');
         $systemName = VideoUtils::systemName();
         $systemLogo = VideoUtils::systemLogo();
-        $channelsJson = VideoUtils::channels(); // 获取渠道列表
+        $channelsJson = VideoUtils::channels();
         $channels = json_decode($channelsJson, true);
+
+        // 获取导航数据
+        $info = VideoUtils::getAvailableChannel();
+        $vodData = $info['data'] ?? [];
+        $navData = VideoUtils::getNav($vodData);
 
         return view('index/search', [
             'keyword'  => $keyword,
             'channels' => $channels['list'],
             'systemName' => $systemName,
             'systemLogo' => $systemLogo,
+            'navItemShow' => $navData['navItemShow'],
+            'navData' => $navData,
         ]);
     }
 
