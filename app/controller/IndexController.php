@@ -251,7 +251,7 @@ class IndexController
         $searchedChannels = [];
         
         // API 搜索频道（支持标准搜索接口）
-        $apiSearchable = ['如意', '魔都', '1080资源库'];
+        $apiSearchable = ['如意', '魔都', '1080资源库', '非凡资源', 'IKUN资源', '电影天堂资源', '豆瓣资源', '影剧资源', '爱奇艺资源'];
         
         foreach ($channelList as $channel) {
             if (($channel['channel_status'] ?? '0') != '1') {
