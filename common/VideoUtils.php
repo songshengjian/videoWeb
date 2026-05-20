@@ -384,36 +384,20 @@ class VideoUtils
         // 获取层级结构数据
         $hierarchical = self::getHierarchicalNav($classList);
 
-        // 扁平化用于导航栏展示
-        $flatItems = [];
+        // 导航栏只展示大类（一级分类）
+        $navItemShow = [];
         foreach ($hierarchical as $parent) {
-            // 添加大类本身
-            if ($parent['channel_type_id'] > 0) {
-                $flatItems[] = [
-                    'type_id' => $parent['type_id'],
-                    'type_name' => $parent['type_name'],
-                    'parent_id' => 0,
-                    'has_children' => !empty($parent['children']),
-                ];
-            }
-            // 添加子类
-            foreach ($parent['children'] as $child) {
-                $flatItems[] = [
-                    'type_id' => $child['type_id'],
-                    'type_name' => $child['type_name'],
-                    'parent_id' => $child['parent_id'],
-                    'has_children' => false,
-                ];
-            }
+            $navItemShow[] = [
+                'type_id' => $parent['type_id'],
+                'type_name' => $parent['type_name'],
+                'parent_id' => 0,
+                'has_children' => !empty($parent['children']),
+            ];
         }
-
-        // 前 8 个作为主导航，其余放"更多"
-        $navItemShow = array_slice($flatItems, 0, 8);
-        $navItemMore = array_slice($flatItems, 8);
 
         return [
             'navItemShow' => $navItemShow,
-            'navItemMore' => $navItemMore,
+            'navItemMore' => [],
             'hierarchical' => $hierarchical,
         ];
     }

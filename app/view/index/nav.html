@@ -18,74 +18,47 @@
 
         /* Header */
         .header {position: sticky; top:0; z-index:100; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
-        .header-container {max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:20px; padding:12px 20px;}
-        .logo {font-size:24px; font-weight:bold; color:#16a34a; text-decoration:none; white-space:nowrap; flex-shrink:0;}
+        .header-inner {max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:24px; padding:12px 20px;}
+        .logo {font-size:24px; font-weight:bold; color:#16a34a; text-decoration:none; white-space:nowrap;}
         
-        /* 导航容器 */
-        .nav-dropdown {flex:1; display:flex; align-items:center; justify-content:center; position:relative; overflow-x:auto;}
-        .nav-dropdown::-webkit-scrollbar {display:none;}
-        .nav-main-items {display:flex; align-items:center; gap:4px; flex-wrap:nowrap;}
-        
-        /* 导航项 */
-        .nav-item, .nav-dropdown-item {
-            padding:8px 14px; 
-            border-radius:20px; 
-            text-decoration:none; 
-            font-size:14px; 
-            color:#333; 
-            transition:0.2s; 
-            white-space:nowrap; 
-            display:inline-flex; 
-            align-items:center;
-            height:36px;
-            line-height:1;
+        /* 导航 */
+        .nav {flex:1; display:flex; align-items:center;}
+        .nav-list {display:flex; align-items:center; gap:4px; list-style:none;}
+        .nav-item {position:relative;}
+        .nav-link {
+            display:flex; align-items:center; gap:4px;
+            padding:8px 14px; border-radius:20px;
+            text-decoration:none; font-size:14px; color:#333;
+            transition:background 0.2s;
+            white-space:nowrap;
         }
-        .nav-item {cursor:pointer;}
-        .nav-item:hover, .nav-dropdown-item:hover {background:#f0f0f0;}
-        .nav-item.active, .nav-dropdown-item.active {background: linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
+        .nav-link:hover, .nav-link.active {background:#16a34a; color:#fff;}
+        .nav-arrow {font-size:10px; transition:transform 0.2s;}
+        .nav-item:hover .nav-arrow {transform:rotate(180deg);}
         
-        /* 分类容器 */
-        .nav-category {position:relative; flex-shrink:0;}
-        
-        /* 子菜单 - 固定在 header 下方 */
+        /* 下拉菜单 - 纯 CSS hover 显示 */
         .nav-submenu {
-            display:none; 
-            position:absolute; 
-            top:100%; 
-            left:50%; 
-            transform:translateX(-50%);
-            background:#fff; 
-            border-radius:8px; 
-            box-shadow:0 8px 24px rgba(0,0,0,0.15); 
-            padding:8px 4px; 
-            z-index:200; 
-            min-width:120px;
-            margin-top:8px;
+            display:none;
+            position:absolute; top:100%; left:50%; transform:translateX(-50%);
+            background:#fff; border-radius:8px;
+            box-shadow:0 8px 24px rgba(0,0,0,0.15);
+            padding:8px 4px; min-width:120px;
+            z-index:200; margin-top:4px;
         }
-        .nav-submenu .nav-dropdown-item {
-            display:block; 
-            padding:8px 12px; 
-            color:#333; 
-            text-decoration:none; 
-            font-size:13px; 
-            white-space:nowrap; 
-            transition:0.2s; 
-            width:100%;
-            height:auto;
-            line-height:1.4;
-            border-radius:4px;
+        .nav-item:hover .nav-submenu {display:block;}
+        .nav-submenu a {
+            display:block; padding:8px 12px; margin:2px 4px;
+            text-decoration:none; font-size:13px; color:#333;
+            border-radius:4px; transition:0.2s;
+            white-space:nowrap;
         }
-        .nav-submenu .nav-dropdown-item:hover {background:linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
-        .nav-submenu .nav-dropdown-item.active {background:linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
-        
-        /* 点击显示子菜单 */
-        .nav-category.open .nav-submenu {display:block;}
+        .nav-submenu a:hover, .nav-submenu a.active {background:#16a34a; color:#fff;}
         
         /* 搜索框 */
         .search-box {position:relative; flex-shrink:0;}
-        .search-input {width:220px; padding:8px 36px 8px 12px; border:2px solid #e0e0e0; border-radius:20px; outline:none; transition:0.3s; font-size:14px;}
-        .search-input:focus {border-color:#16a34a; box-shadow:0 0 8px rgba(34,197,94,0.2);}
-        .search-btn {position:absolute; right:4px; top:50%; transform:translateY(-50%); width:28px; height:28px; border:none; border-radius:50%; background: linear-gradient(135deg,#16a34a,#22c55e); color:#fff; cursor:pointer; font-size:14px;}
+        .search-input {width:200px; padding:8px 36px 8px 12px; border:2px solid #e0e0e0; border-radius:20px; outline:none; font-size:14px; transition:0.3s;}
+        .search-input:focus {border-color:#16a34a; width:240px;}
+        .search-btn {position:absolute; right:4px; top:50%; transform:translateY(-50%); width:28px; height:28px; border:none; border-radius:50%; background:#16a34a; color:#fff; cursor:pointer;}
 
         /* 视频列表 */
         .video_content_card {display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; max-width:1400px; margin:10px auto 40px; padding-left:120px; padding-right:120px;}
@@ -94,68 +67,65 @@
         .card-image {width:100%; height:200px; object-fit:cover;}
         .card-content {padding:15px; flex-grow:1; display:flex; flex-direction:column;}
         .card-title {font-size:18px; font-weight:600; margin-bottom:10px; color:#333;}
-        .card-subtitle {font-size:14px; color:#666; margin-bottom:10px;}
         .card-info {display:flex; justify-content:space-between; font-size:12px; color:#888; margin-top:auto;}
-        .card-tag {display:inline-block; background:#f0f0f0; color:#666; padding:3px 8px; border-radius:4px; margin-right:5px; margin-bottom:5px; font-size:12px;}
         .card-footer {display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid #f0f0f0;}
         .update-info {font-size:12px; color:#22c55e; font-weight:500;}
         .play-btn {background:#22c55e; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; transition:0.3s;}
         .play-btn:hover {background:#16a34a;}
         .no-data {text-align:center; padding:40px; color:#999; grid-column:1/-1;}
 
-        @media(max-width:1024px){.video_content_card {padding-left:20px; padding-right:20px;} #ad-left,#ad-right{display:none;}}
-        @media(max-width:768px){
-            .header-container{flex-direction:column; gap:10px; padding:10px 12px;}
-            .logo{font-size:20px; text-align:center;}
-            .nav-dropdown{justify-content:flex-start; width:100%;}
-            .nav-main-items{gap:2px;}
-            .nav-item, .nav-dropdown-item{font-size:13px; padding:6px 10px; height:32px;}
-            .search-box{width:100%;}
-            .search-input{width:100%;}
-            .video_content_card{grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; padding-left:12px; padding-right:12px;}
+        @media(max-width:1024px){
+            .video_content_card {padding-left:20px; padding-right:20px;}
             #ad-left,#ad-right{display:none;}
+        }
+        @media(max-width:768px){
+            .header-inner{flex-wrap:wrap; gap:10px; padding:10px 12px;}
+            .logo{font-size:20px; width:100%; text-align:center;}
+            .nav{width:100%; order:3;}
+            .nav-list{overflow-x:auto; flex-wrap:nowrap; padding-bottom:4px;}
+            .nav-list::-webkit-scrollbar{display:none;}
+            .nav-link{padding:6px 10px; font-size:13px;}
+            .nav-submenu{position:fixed; top:auto; bottom:0; left:0; right:0; transform:none; border-radius:12px 12px 0 0; margin-top:0; min-width:auto; padding:12px;}
+            .search-box{width:100%; order:2;}
+            .search-input{width:100%;}
+            .search-input:focus{width:100%;}
+            .video_content_card{grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; padding-left:12px; padding-right:12px;}
         }
         @media(max-width:480px){.video_content_card{grid-template-columns:1fr;}}
     </style>
 </head>
 <body>
 
-   
-    <!-- Header -->
 <header class="header">
-    <div class="header-container">
-        <a href="{$systemLogo|default='/'}" class="logo">{$systemName|default='影视站'}</a>
-        <nav class="nav-dropdown">
-            <div class="nav-main-items">
-                <a href="/index/index" class="nav-item">首页</a>
-
+    <div class="header-inner">
+        <a href="/index/index" class="logo">{$systemName|default='影视站'}</a>
+        <nav class="nav">
+            <ul class="nav-list">
+                <li class="nav-item"><a href="/index/index" class="nav-link {if !isset($navData.currentTid) || $navData.currentTid==0}active{/if}">首页</a></li>
                 {foreach $navItemShow as $navItem}
-                    {if $navItem.has_children && $navItem.parent_id === 0}
-                    <div class="nav-category" id="cat-{$navItem.type_id}">
-                        <a href="javascript:void(0)" class="nav-item {$navItem.active?'active':''}" onclick="toggleSubmenu({$navItem.type_id})">
-                            {$navItem.type_name} ▼
-                        </a>
-                        <div class="nav-submenu">
-                            {if isset($navData.hierarchical)}
-                                {foreach $navData.hierarchical as $parentCat}
-                                    {if $parentCat.type_id == $navItem.type_id && !empty($parentCat.children)}
-                                        {foreach $parentCat.children as $child}
-                                        <a href="/index/nav?tid={$child.type_id}" class="nav-dropdown-item {$child.active?'active':''}">{$child.type_name}</a>
-                                        {/foreach}
-                                    {/if}
+                <li class="nav-item">
+                    <a href="/index/nav?tid={$navItem.type_id}" class="nav-link {if isset($navData.currentTid) && ($navData.currentTid==$navItem.type_id || (in_array($navData.currentTid,[1,2,3,4,5]) && $navItem.type_id==$navData.currentParentId))}active{/if}">
+                        {$navItem.type_name}
+                        {if $navItem.has_children}<span class="nav-arrow">▼</span>{/if}
+                    </a>
+                    {if $navItem.has_children}
+                    <div class="nav-submenu">
+                        {foreach $navData.hierarchical as $h}
+                            {if $h.type_id == $navItem.type_id}
+                                {foreach $h.children as $child}
+                                <a href="/index/nav?tid={$child.type_id}" class="{if isset($navData.currentTid) && $navData.currentTid==$child.type_id}active{/if}">{$child.type_name}</a>
                                 {/foreach}
                             {/if}
-                        </div>
+                        {/foreach}
                     </div>
-                    {else}
-                    <a href="/index/nav?tid={$navItem.type_id}" class="nav-item {$navItem.active?'active':''}">{$navItem.type_name}</a>
                     {/if}
+                </li>
                 {/foreach}
-            </div>
+            </ul>
         </nav>
         <div class="search-box">
             <form method="GET" action="/index/search">
-                <input type="text" name="keyword" class="search-input" placeholder="搜索电影、电视剧..." value="{$currentKeyword|default=''}">
+                <input type="text" name="keyword" class="search-input" placeholder="搜索..." value="{$currentKeyword|default=''}">
                 <button type="submit" class="search-btn">🔍</button>
             </form>
         </div>
@@ -202,29 +172,6 @@
 
 <script src="/ads/ads.js"></script>
 <script>
-// 切换子菜单
-function toggleSubmenu(catId) {
-    const cat = document.getElementById('cat-' + catId);
-    const allCats = document.querySelectorAll('.nav-category');
-    
-    // 关闭其他已打开的子菜单
-    allCats.forEach(c => {
-        if (c.id !== 'cat-' + catId) {
-            c.classList.remove('open');
-        }
-    });
-    
-    // 切换当前子菜单
-    cat.classList.toggle('open');
-}
-
-// 点击外部关闭子菜单
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.nav-category')) {
-        document.querySelectorAll('.nav-category').forEach(c => c.classList.remove('open'));
-    }
-});
-
 function playVideo(vod_name){
     window.location.href = '/index/search?keyword='+encodeURIComponent(vod_name);
 }

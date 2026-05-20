@@ -35,7 +35,8 @@ class IndexController
             'systemLogo'      => $systemLogo,
             'navItemShow'     => $navData['navItemShow'],
             'navItemMore'     => $navData['navItemMore'],
-            'recommendList'   => $recommendList,            // 👈 新增
+            'navData'         => $navData,
+            'recommendList'   => $recommendList,
         ]);
     }
 
@@ -53,13 +54,24 @@ class IndexController
         $classList  = $vodData['class'] ?? [];
         $navData = VideoUtils::getNav($vodData);
 
-        // 判断是否为大类（有子类的大类ID为 1,2,3,4,5）
+        // 判断当前选中的是大类还是子类
         $isParent = in_array($unifiedTid, [1, 2, 3, 4, 5], true);
         $childTypeIds = [];
+        $currentParentId = 0;
 
         if ($isParent) {
-            // 大类点击：获取所有子类的 channel_type_id
             $childTypeIds = VideoUtils::getChildrenTypeIds($unifiedTid, $classList);
+            $currentParentId = $unifiedTid;
+        } elseif ($unifiedTid > 0) {
+            // 子类：找出所属大类
+            foreach ($navData['hierarchical'] as $h) {
+                foreach ($h['children'] as $child) {
+                    if ($child['type_id'] == $unifiedTid) {
+                        $currentParentId = $h['type_id'];
+                        break;
+                    }
+                }
+            }
         }
 
         // 查询视频列表
@@ -72,7 +84,10 @@ class IndexController
             'systemLogo' => $systemLogo,
             'navItemShow' => $navData['navItemShow'],
             'navItemMore' => $navData['navItemMore'],
-            'navData' => $navData,
+            'navData' => array_merge($navData, [
+                'currentTid' => $unifiedTid,
+                'currentParentId' => $currentParentId,
+            ]),
             'videoData' => $videoList,
         ]);
     }

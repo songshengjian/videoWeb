@@ -41,10 +41,7 @@
         .header-container {
             max-width: 1200px;
             margin: 0 auto;
-            display: grid;
-            /* 改用 Grid 布局 */
-            grid-template-columns: auto 1fr auto;
-            /* logo | 导航(自适应) | 搜索 */
+            display: flex;
             align-items: center;
             gap: 20px;
             padding: 0 20px;
@@ -67,156 +64,38 @@
             color: #22c55e;
         }
 
-        /* 导航容器 - 居中自适应 */
-        .nav-dropdown {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* 导航居中 */
-            gap: 15px;
-            position: relative;
-            min-width: 0;
-            /* 允许收缩 */
-            flex: 1;
-            /* 占据剩余空间 */
+        /* 导航 */
+        .nav {flex:1; display:flex; align-items:center;}
+        .nav-list {display:flex; align-items:center; gap:4px; list-style:none; margin:0; padding:0;}
+        .nav-item {position:relative;}
+        .nav-link {
+            display:flex; align-items:center; gap:4px;
+            padding:8px 14px; border-radius:20px;
+            text-decoration:none; font-size:14px; color:#333;
+            transition:background 0.2s;
+            white-space:nowrap;
         }
-
-        .nav-main-items {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: nowrap;
-            /* 不换行 */
-            overflow: hidden;
-            /* 防止溢出 */
-        }
-
-        .nav-item {
-            color: #333;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            white-space: nowrap;
-            flex-shrink: 1;
-            /* 允许收缩 */
-            min-width: 0;
-        }
-
-        .nav-item:hover {
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .nav-item.active {
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            color: white;
-            box-shadow: 0 4px 12px rgba(34,197,94, 0.3);
-        }
-
-        /* 更多菜单 */
-        .nav-more {
-            position: relative;
-            flex-shrink: 0;
-            /* 不收缩 */
-        }
-
-        /* 分类下拉菜单 */
-        .nav-category {
-            position: relative;
-            flex-shrink: 0;
-        }
-
+        .nav-link:hover, .nav-link.active {background:#16a34a; color:#fff;}
+        .nav-arrow {font-size:10px; transition:transform 0.2s;}
+        .nav-item:hover .nav-arrow {transform:rotate(180deg);}
+        
+        /* 下拉菜单 - 纯 CSS hover 显示 */
         .nav-submenu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            padding: 8px 0;
-            z-index: 200;
-            min-width: 130px;
-            margin-top: 8px;
+            display:none;
+            position:absolute; top:100%; left:50%; transform:translateX(-50%);
+            background:#fff; border-radius:8px;
+            box-shadow:0 8px 24px rgba(0,0,0,0.15);
+            padding:8px 4px; min-width:120px;
+            z-index:200; margin-top:4px;
         }
-
-        .nav-submenu .nav-dropdown-item {
-            display: block;
-            padding: 10px 16px;
-            color: #333;
-            text-decoration: none;
-            font-size: 13px;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            width: 100%;
+        .nav-item:hover .nav-submenu {display:block;}
+        .nav-submenu a {
+            display:block; padding:8px 12px; margin:2px 4px;
+            text-decoration:none; font-size:13px; color:#333;
+            border-radius:4px; transition:0.2s;
+            white-space:nowrap;
         }
-
-        .nav-submenu .nav-dropdown-item:hover {
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            color: white;
-        }
-
-        .nav-submenu .nav-dropdown-item.active {
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            color: white;
-        }
-
-        /* 点击显示子菜单 */
-        .nav-category.open .nav-submenu {
-            display: block;
-        }
-
-        .nav-more-btn {
-            color: #333;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .nav-more-btn:hover {
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            color: white;
-        }
-
-        .nav-more-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            padding: 10px 0;
-            min-width: 200px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            z-index: 1000;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .nav-more:hover .nav-more-dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .nav-dropdown-item {
-            display: block;
-            color: #333;
-            text-decoration: none;
-            padding: 10px 20px;
+        .nav-submenu a:hover, .nav-submenu a.active {background:#16a34a; color:#fff;}
             transition: background 0.3s ease;
             border-bottom: 1px solid #f0f0f0;
             white-space: nowrap;
@@ -397,30 +276,40 @@
 
         @media (max-width: 768px) {
             .header-container {
-                grid-template-columns: 1fr;
-                gap: 12px;
+                flex-wrap: wrap;
+                gap: 10px;
                 padding: 0 12px;
             }
             .logo {
-                font-size: 22px;
+                font-size: 20px;
                 text-align: center;
+                width: 100%;
             }
-            .nav-dropdown {
-                justify-content: flex-start;
+            .nav {
+                width: 100%;
+                order: 3;
             }
-            .nav-main-items {
+            .nav-list {
                 overflow-x: auto;
-                scrollbar-width: none;
+                flex-wrap: nowrap;
+                padding-bottom: 4px;
             }
-            .nav-main-items::-webkit-scrollbar {
-                display: none;
-            }
-            .nav-item {
-                padding: 6px 12px;
+            .nav-list::-webkit-scrollbar {display:none;}
+            .nav-link {
+                padding: 6px 10px;
                 font-size: 13px;
             }
-            .nav-more {
-                display: none;
+            .nav-submenu {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                transform: none;
+                border-radius: 12px 12px 0 0;
+                margin-top: 0;
+                min-width: auto;
+                padding: 12px;
             }
             .search-box {
                 width: 100%;
@@ -518,42 +407,36 @@
     <header class="header">
         <div class="header-container">
             <!-- Logo 区域 -->
-            <a href="{$systemLogo|default='/'}" class="logo">{$systemName|default='影视站'}</a>
+            <a href="/index/index" class="logo">{$systemName|default='影视站'}</a>
 
             <!-- 导航区域 -->
-            <nav class="nav-dropdown">
-                <div class="nav-main-items">
-                    <a href="/index/index" class="nav-item">首页</a>
-
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="/index/index" class="nav-link active">首页</a></li>
                     {foreach $navItemShow as $navItem}
-                        {if $navItem.has_children && $navItem.parent_id === 0}
-                        <div class="nav-category" id="cat-{$navItem.type_id}">
-                            <a href="javascript:void(0)" class="nav-item {$navItem.active?'active':''}" onclick="toggleSubmenu({$navItem.type_id})">
-                                {$navItem.type_name} ▼
-                            </a>
-                            <div class="nav-submenu">
-                                {if isset($navData.hierarchical)}
-                                    {foreach $navData.hierarchical as $parentCat}
-                                        {if $parentCat.type_id == $navItem.type_id && !empty($parentCat.children)}
-                                            {foreach $parentCat.children as $child}
-                                            <a href="/index/nav?tid={$child.type_id}" class="nav-dropdown-item {$child.active?'active':''}">{$child.type_name}</a>
-                                            {/foreach}
-                                        {/if}
+                    <li class="nav-item">
+                        <a href="/index/nav?tid={$navItem.type_id}" class="nav-link">
+                            {$navItem.type_name}
+                            {if $navItem.has_children}<span class="nav-arrow">▼</span>{/if}
+                        </a>
+                        {if $navItem.has_children}
+                        <div class="nav-submenu">
+                            {foreach $navData.hierarchical as $h}
+                                {if $h.type_id == $navItem.type_id}
+                                    {foreach $h.children as $child}
+                                    <a href="/index/nav?tid={$child.type_id}">{$child.type_name}</a>
                                     {/foreach}
                                 {/if}
-                            </div>
+                            {/foreach}
                         </div>
-                        {else}
-                        <a href="/index/nav?tid={$navItem.type_id}" class="nav-item {$navItem.active ? 'active' : ''}">
-                            {$navItem.type_name}
-                        </a>
                         {/if}
+                    </li>
                     {/foreach}
-                </div>
+                </ul>
             </nav>
 
             <!-- 下载 APP 按钮 -->
-            <a href="/VideoApp.apk" class="nav-item" style="color: #16a34a; font-weight: bold;">
+            <a href="/VideoApp.apk" class="nav-link" style="color: #16a34a; font-weight: bold;">
                 📱 下载 APP
             </a>
 
@@ -641,27 +524,6 @@
                     this.classList.add('active');
                 });
             });
-        });
-
-        // 切换子菜单
-        function toggleSubmenu(catId) {
-            const cat = document.getElementById('cat-' + catId);
-            const allCats = document.querySelectorAll('.nav-category');
-            
-            allCats.forEach(c => {
-                if (c.id !== 'cat-' + catId) {
-                    c.classList.remove('open');
-                }
-            });
-            
-            cat.classList.toggle('open');
-        }
-
-        // 点击外部关闭子菜单
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.nav-category')) {
-                document.querySelectorAll('.nav-category').forEach(c => c.classList.remove('open'));
-            }
         });
 
         // 动态加载广告函数
