@@ -242,37 +242,64 @@ class IndexController
             return json(['code' => 0, 'msg' => '搜索关键词不能为空', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
         }
         
-        $info = VideoUtils::getAvailableChannel();
-        if (!$info) {
-            return json(['code' => 0, 'msg' => '无可用视频源', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
+        $channelsJson = VideoUtils::channels();
+        $channels = json_decode($channelsJson, true);
+        $channelList = $channels['list'] ?? [];
+        
+        $allResults = [];
+        $totalResults = 0;
+        $searchedChannels = [];
+        
+        foreach ($channelList as $channel) {
+            if (($channel['channel_status'] ?? '0') != '1') {
+                continue;
+            }
+            
+            $url = rtrim($channel['channel_url'], '/') . '/?ac=detail&wd=' . urlencode($keyword) . '&pg=' . $page . '&limit=' . $limit;
+            
+            $options = [
+                'http' => [
+                    'method'  => 'GET',
+                    'header'  => [
+                        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                        "Accept: application/json",
+                    ],
+                    'timeout' => 15,
+                ]
+            ];
+            $context = stream_context_create($options);
+            $resp = @file_get_contents($url, false, $context);
+            
+            if ($resp !== false) {
+                $data = json_decode($resp, true);
+                if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
+                    $list = $data['list'] ?? [];
+                    if (!empty($list)) {
+                        foreach ($list as $item) {
+                            $item['_channel_name'] = $channel['channel_name'];
+                            $item['_channel_id'] = $channel['channel_id'];
+                            $allResults[] = $item;
+                        }
+                        $totalResults += (int)($data['total'] ?? 0);
+                        $searchedChannels[] = $channel['channel_name'];
+                    }
+                }
+            }
         }
         
-        $channel = $info['channel'];
-        $url = rtrim($channel['channel_url'], '/') . '/?ac=detail&wd=' . urlencode($keyword) . '&pg=' . $page . '&limit=' . $limit;
-        
-        $options = [
-            'http' => [
-                'method'  => 'GET',
-                'header'  => [
-                    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                    "Accept: application/json",
-                ],
-                'timeout' => 30,
-            ]
-        ];
-        $context = stream_context_create($options);
-        $resp = @file_get_contents($url, false, $context);
-        
-        if ($resp === false) {
-            return json(['code' => 0, 'msg' => '搜索失败', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
+        if (empty($allResults)) {
+            return json(['code' => 0, 'msg' => '未找到相关结果', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0, 'searched_channels' => $searchedChannels]);
         }
         
-        $data = json_decode($resp, true);
-        if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
-            return json($data);
-        }
-        
-        return json(['code' => 0, 'msg' => '搜索结果解析失败', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
+        return json([
+            'code' => 1,
+            'msg' => '数据列表',
+            'list' => array_slice($allResults, 0, $limit),
+            'total' => $totalResults,
+            'page' => $page,
+            'pagecount' => ceil($totalResults / $limit),
+            'searched_channels' => $searchedChannels,
+        ]);
     }
     
     /**
