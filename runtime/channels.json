@@ -63,6 +63,16 @@
             "channel_sort": "93",
             "create_time": "2026-05-20 08:00:00",
             "update_time": "2026-05-20 08:00:00"
+        },
+        {
+            "channel_id": 8,
+            "channel_name": "红牛资源",
+            "channel_url": "https:\/\/www.hongniuzy2.com\/api.php\/provide\/vod\/",
+            "channel_search_url": "https:\/\/hongniuzy.net\/index.php\/vod\/search.html",
+            "channel_status": "1",
+            "channel_sort": "92",
+            "create_time": "2026-05-20 08:00:00",
+            "update_time": "2026-05-20 08:00:00"
         }
     ],
     "msg": "success"

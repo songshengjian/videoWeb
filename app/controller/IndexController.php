@@ -250,8 +250,10 @@ class IndexController
         $totalResults = 0;
         $searchedChannels = [];
         
-        // 支持搜索的频道（其他频道搜索接口返回空）
-        $searchableChannels = ['如意', '魔都', '1080资源库'];
+        // API 搜索频道
+        $apiSearchable = ['如意', '魔都', '1080资源库'];
+        // 网页搜索频道（需要解析 HTML）
+        $webSearchable = ['红牛资源'];
         
         foreach ($channelList as $channel) {
             if (($channel['channel_status'] ?? '0') != '1') {
@@ -259,39 +261,64 @@ class IndexController
             }
             
             $channelName = $channel['channel_name'] ?? '';
-            // 只搜索支持搜索接口的频道
-            if (!in_array($channelName, $searchableChannels, true)) {
-                continue;
-            }
             
-            $url = rtrim($channel['channel_url'], '/') . '/?ac=detail&wd=' . urlencode($keyword) . '&pg=' . $page . '&limit=' . $limit;
-            
-            $options = [
-                'http' => [
-                    'method'  => 'GET',
-                    'header'  => [
-                        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                        "Accept: application/json",
-                    ],
-                    'timeout' => 8,
-                ]
-            ];
-            $context = stream_context_create($options);
-            $resp = @file_get_contents($url, false, $context);
-            
-            if ($resp !== false && strlen($resp) > 10) {
-                $data = json_decode($resp, true);
-                if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
-                    $list = $data['list'] ?? [];
-                    if (!empty($list)) {
-                        foreach ($list as $item) {
-                            $item['_channel_name'] = $channelName;
-                            $item['_channel_id'] = $channel['channel_id'];
-                            $allResults[] = $item;
+            // API 搜索
+            if (in_array($channelName, $apiSearchable, true)) {
+                $url = rtrim($channel['channel_url'], '/') . '/?ac=detail&wd=' . urlencode($keyword) . '&pg=' . $page . '&limit=' . $limit;
+                
+                $options = [
+                    'http' => [
+                        'method'  => 'GET',
+                        'header'  => [
+                            "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                            "Accept: application/json",
+                        ],
+                        'timeout' => 8,
+                    ]
+                ];
+                $context = stream_context_create($options);
+                $resp = @file_get_contents($url, false, $context);
+                
+                if ($resp !== false && strlen($resp) > 10) {
+                    $data = json_decode($resp, true);
+                    if (is_array($data) && isset($data['code']) && $data['code'] == 1) {
+                        $list = $data['list'] ?? [];
+                        if (!empty($list)) {
+                            foreach ($list as $item) {
+                                $item['_channel_name'] = $channelName;
+                                $item['_channel_id'] = $channel['channel_id'];
+                                $allResults[] = $item;
+                            }
+                            $totalResults += (int)($data['total'] ?? 0);
                         }
-                        $totalResults += (int)($data['total'] ?? 0);
+                        $searchedChannels[] = $channelName;
                     }
-                    $searchedChannels[] = $channelName;
+                }
+            }
+            // 网页搜索（红牛资源）
+            elseif (in_array($channelName, $webSearchable, true)) {
+                $searchUrl = ($channel['channel_search_url'] ?? '') . '?wd=' . urlencode($keyword);
+                
+                $options = [
+                    'http' => [
+                        'method'  => 'GET',
+                        'header'  => [
+                            "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                            "Accept: text/html,application/xhtml+xml",
+                        ],
+                        'timeout' => 10,
+                    ]
+                ];
+                $context = stream_context_create($options);
+                $html = @file_get_contents($searchUrl, false, $context);
+                
+                if ($html !== false && strlen($html) > 100) {
+                    $parsedResults = self::parseHongniuSearchHtml($html, $channelName, $channel['channel_id']);
+                    if (!empty($parsedResults)) {
+                        $allResults = array_merge($allResults, $parsedResults);
+                        $totalResults += count($parsedResults);
+                        $searchedChannels[] = $channelName;
+                    }
                 }
             }
         }
@@ -309,6 +336,38 @@ class IndexController
             'pagecount' => ceil($totalResults / $limit),
             'searched_channels' => $searchedChannels,
         ]);
+    }
+    
+    /**
+     * 解析红牛资源搜索页面 HTML
+     */
+    private static function parseHongniuSearchHtml(string $html, string $channelName, int $channelId): array
+    {
+        $results = [];
+        
+        // 匹配搜索结果项：<li><span class="xing_vb4"><a ... href="/index.php/vod/detail/id/XXX.html">名称</a></span><span class="xing_vb5">类别</span>...
+        preg_match_all('/<li>\s*<span class="xing_vb4"><a[^>]*href="[^"]*\/vod\/detail\/id\/([^"]+)"[^>]*>([^<]+)<\/a>.*?<span class="xing_vb5">([^<]*)<\/span>/s', $html, $matches, PREG_SET_ORDER);
+        
+        foreach ($matches as $match) {
+            $vodId = $match[1];
+            $vodName = trim($match[2]);
+            $type = trim($match[3]);
+            
+            if (empty($vodName)) {
+                continue;
+            }
+            
+            $results[] = [
+                'vod_id' => $vodId,
+                'vod_name' => $vodName,
+                'type_name' => $type,
+                '_channel_name' => $channelName,
+                '_channel_id' => $channelId,
+                '_is_web_search' => true,
+            ];
+        }
+        
+        return $results;
     }
     
     /**
