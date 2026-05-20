@@ -54,6 +54,15 @@
             "channel_sort": "94",
             "create_time": "2026-05-19 08:00:00",
             "update_time": "2026-05-19 08:00:00"
+        },
+        {
+            "channel_id": 7,
+            "channel_name": "牛牛资源",
+            "channel_url": "https:\/\/api.niuniuzy.me\/api.php\/provide\/vod\/",
+            "channel_status": "1",
+            "channel_sort": "93",
+            "create_time": "2026-05-20 08:00:00",
+            "update_time": "2026-05-20 08:00:00"
         }
     ],
     "msg": "success"
