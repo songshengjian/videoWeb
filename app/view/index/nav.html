@@ -26,6 +26,14 @@
         .nav-item, .nav-dropdown-item {padding:8px 16px; border-radius:20px; text-decoration:none; font-size:14px; color:#333; transition:0.3s; white-space:nowrap;}
         .nav-item {pointer-events:auto; cursor:pointer;}
         .nav-item.active, .nav-dropdown-item.active {background: linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
+        .nav-category {position:relative; flex-shrink:1; min-width:0;}
+        .nav-submenu {display:none; position:absolute; top:100%; left:50%; transform:translateX(-50%); background:#fff; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.15); padding:10px 0; z-index:1002; min-width:140px;}
+        .nav-submenu::before {content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:12px; height:6px; background:#fff; clip-path:polygon(0 100%, 50% 0, 100% 100%);}
+        .nav-submenu .nav-dropdown-item {display:block; padding:8px 16px; color:#333; text-decoration:none; font-size:13px; white-space:nowrap; transition:0.2s;}
+        .nav-submenu .nav-dropdown-item:hover {background:linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
+        .nav-submenu .nav-dropdown-item.active {background:linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
+        .nav-category:hover .nav-submenu {display:block;}
+        .nav-item.active, .nav-dropdown-item.active {background: linear-gradient(135deg,#16a34a,#22c55e); color:#fff;}
         .search-box {position:relative; flex-shrink:0;}
         .search-input {width:250px; padding:10px 40px 10px 15px; border:2px solid #ccc; border-radius:25px; outline:none; transition:0.3s;}
         .search-input:focus {border-color:#16a34a; box-shadow:0 0 8px rgba(34,197,94,0.3);}
@@ -71,9 +79,29 @@
         <a href="{$systemLogo|default='/'}" class="logo">{$systemName|default='影视站'}</a>
         <nav class="nav-dropdown">
             <div class="nav-main-items">
-                <a href="/index/index" class="nav-item {$navItem.active?'active':''}">首页</a>
+                <a href="/index/index" class="nav-item">首页</a>
+
                 {foreach $navItemShow as $navItem}
+                    {if $navItem.has_children && $navItem.parent_id === 0}
+                    <div class="nav-category">
+                        <a href="/index/nav?tid={$navItem.type_id}" class="nav-item {$navItem.active?'active':''}">
+                            {$navItem.type_name} ▼
+                        </a>
+                        <div class="nav-submenu">
+                            {if isset($navData.hierarchical)}
+                                {foreach $navData.hierarchical as $parentCat}
+                                    {if $parentCat.type_id == $navItem.type_id && !empty($parentCat.children)}
+                                        {foreach $parentCat.children as $child}
+                                        <a href="/index/nav?tid={$child.type_id}" class="nav-dropdown-item {$child.active?'active':''}">{$child.type_name}</a>
+                                        {/foreach}
+                                    {/if}
+                                {/foreach}
+                            {/if}
+                        </div>
+                    </div>
+                    {else}
                     <a href="/index/nav?tid={$navItem.type_id}" class="nav-item {$navItem.active?'active':''}">{$navItem.type_name}</a>
+                    {/if}
                 {/foreach}
             </div>
         </nav>
