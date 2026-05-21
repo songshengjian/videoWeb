@@ -357,15 +357,9 @@ class AdminController
             return (new Response(302, ['Location' => '/admin/apk?msg=apk_too_large']));
         }
         
-        // 创建目录
-        $apkDir = public_path() . '/apk/';
-        if (!is_dir($apkDir)) {
-            mkdir($apkDir, 0755, true);
-        }
-        
-        // 移动文件
+        // 移动文件到 public 目录
         $apkPath = public_path() . '/VideoApp.apk';
-        $file->move($apkPath);
+        $file->move($apkPath, true);
         
         VideoLogUtils::info([
             'action' => 'uploadApk',
