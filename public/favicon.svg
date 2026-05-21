@@ -1,0 +1,29 @@
+<svg width="500" height="500" viewBox="0 0 680 680" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>畅观影视图标</title>
+  <desc>畅观视频平台图标，电影胶片轮造型</desc>
+
+  <!-- Background -->
+  <rect x="90" y="90" width="500" height="500" rx="108" fill="#120820"/>
+
+  <!-- Main reel body -->
+  <circle cx="340" cy="340" r="170" fill="#D42B41"/>
+
+  <!-- 6 holes at r=115, every 60° from top -->
+  <circle cx="340" cy="225" r="25" fill="#120820"/>
+  <circle cx="440" cy="282" r="25" fill="#120820"/>
+  <circle cx="440" cy="398" r="25" fill="#120820"/>
+  <circle cx="340" cy="455" r="25" fill="#120820"/>
+  <circle cx="240" cy="398" r="25" fill="#120820"/>
+  <circle cx="240" cy="282" r="25" fill="#120820"/>
+
+  <!-- 3 spokes (between holes, rotated 30°/90°/150° from vertical) -->
+  <rect x="331" y="170" width="18" height="340" fill="#120820" transform="rotate(30,340,340)"/>
+  <rect x="331" y="170" width="18" height="340" fill="#120820" transform="rotate(90,340,340)"/>
+  <rect x="331" y="170" width="18" height="340" fill="#120820" transform="rotate(150,340,340)"/>
+
+  <!-- Center hub rings -->
+  <circle cx="340" cy="340" r="56" fill="#120820"/>
+  <circle cx="340" cy="340" r="40" fill="#D42B41"/>
+  <circle cx="340" cy="340" r="20" fill="#120820"/>
+  <circle cx="340" cy="340" r="10" fill="#D42B41"/>
+</svg>
