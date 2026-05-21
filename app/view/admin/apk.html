@@ -185,7 +185,10 @@ fileInput.addEventListener('change', function() { updateFileDisplay(this.files[0
 
 uploadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    if (!fileInput.files[0]) return;
+    if (!fileInput.files[0]) {
+        alert('请先选择要上传的 APK 文件');
+        return;
+    }
 
     const file = fileInput.files[0];
     const formData = new FormData();

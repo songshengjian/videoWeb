@@ -365,7 +365,12 @@ class AdminController
         // 移动文件到 public 目录
         $apkPath = public_path() . '/VideoApp.apk';
         try {
-            $file->move($apkPath, true);
+            // 如果已存在旧文件，先删除
+            if (file_exists($apkPath)) {
+                unlink($apkPath);
+            }
+            
+            $file->move($apkPath);
             
             // 校验移动后的文件
             if (!file_exists($apkPath) || filesize($apkPath) === 0) {
