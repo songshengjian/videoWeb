@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>视频播放 - {$systemName|default='影视站'}</title>
+    <title>视频播放 - {$systemName|default='畅观'}</title>
     <!-- 预加载关键资源 -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
@@ -313,7 +313,7 @@
 <!-- 头部导航 -->
 <header class="header">
     <div class="header-container">
-        <a href="/" class="logo">{$systemName|default='影视站'}</a>
+        <a href="/" class="logo">{$systemName|default='畅观'}</a>
         <button class="back-btn" onclick="goBack()">返回搜索</button>
     </div>
 </header>
@@ -760,7 +760,7 @@
         debugLog('更新视频信息', video);
 
         // 更新页面标题
-        document.title = `${video.vod_name} - 影视播放`;
+        document.title = `${video.vod_name} - 畅观播放`;
 
         // 更新视频信息
         document.getElementById('videoTitle').textContent = video.vod_name || '未知标题';

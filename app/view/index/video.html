@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>视频播放 - {$systemName|default='影视站'}</title>
+    <title>视频播放 - {$systemName|default='畅观'}</title>
     
     <!-- 移动端优化 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -808,7 +808,7 @@
 <!-- 头部导航 -->
 <header class="header">
     <div class="header-container">
-        <a href="/" class="logo">{$systemName|default='影视站'}</a>
+        <a href="/" class="logo">{$systemName|default='畅观'}</a>
         <button class="back-btn" onclick="goBack()">返回搜索</button>
     </div>
 </header>
@@ -1770,7 +1770,7 @@
         const video = videoData.list[0];
         debugLog('更新视频信息', video);
 
-        document.title = `${video.vod_name} - 影视播放`;
+        document.title = `${video.vod_name} - 畅观播放`;
 
         document.getElementById('videoTitle').textContent = video.vod_name || '未知标题';
         document.getElementById('videoYear').textContent = `年份：${video.vod_year || '未知'}`;

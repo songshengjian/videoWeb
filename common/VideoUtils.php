@@ -280,7 +280,7 @@ class VideoUtils
 
     public static function systemName(): string
     {
-        return "神特么影视站";
+        return "畅观";
     }
     public static function systemLogo():string
     {
