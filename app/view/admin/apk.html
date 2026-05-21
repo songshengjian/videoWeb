@@ -3,125 +3,146 @@
 <head>
 <meta charset="UTF-8">
 <title>APK 管理</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-:root{
-    --bg:#f3f8f4;
-    --card:#ffffff;
-    --primary:#D42B41;
-    --primary-dark:#B02435;
-    --text:#333;
-    --text-light:#666;
-    --border:#e0e0e0;
-    --shadow:0 2px 12px rgba(0,0,0,0.08);
-}
-<?php if ($theme === 'winter'): ?>
-:root{ --bg:#f5f7fa; --card:#ffffff; --primary:#2563eb; --primary-dark:#1d4ed8; }
-<?php elseif ($theme === 'finance'): ?>
-:root{ --bg:#fdf8f0; --card:#ffffff; --primary:#d97706; --primary-dark:#b45309; }
-<?php elseif ($theme === 'tech'): ?>
-:root{ --bg:#0f172a; --card:#1e293b; --primary:#22c55e; --primary-dark:#16a34a; --text:#e2e8f0; --text-light:#94a3b8; --border:#334155; }
-<?php endif; ?>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:var(--card);box-shadow:var(--shadow);padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
-.header .logo{font-size:20px;font-weight:bold;color:var(--primary)}
-.nav{display:flex;gap:8px}
-.nav a{padding:8px 16px;border-radius:8px;text-decoration:none;color:var(--text);font-size:14px;transition:0.2s}
-.nav a:hover,.nav a.active{background:var(--primary);color:#fff}
-.container{max-width:800px;margin:40px auto;padding:0 20px}
-.panel{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:24px;margin-bottom:24px}
-.panel h2{font-size:18px;margin-bottom:16px;color:var(--primary-dark)}
-.form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:14px;color:var(--text-light);margin-bottom:8px}
-.form-group input[type="file"]{width:100%;padding:12px;border:2px dashed var(--border);border-radius:8px;background:var(--bg);cursor:pointer}
-.form-group input[type="file"]:hover{border-color:var(--primary)}
-.btn{padding:12px 24px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:0.2s;font-weight:bold}
-.btn-primary{background:var(--primary);color:#fff}
-.btn-primary:hover{background:var(--primary-dark)}
-.btn-danger{background:#ef4444;color:#fff}
-.btn-danger:hover{background:#dc2626}
-.btn-group{display:flex;gap:12px;margin-top:16px}
-.apk-info{display:flex;align-items:center;gap:16px;padding:16px;background:var(--bg);border-radius:8px;margin-top:16px}
-.apk-icon{font-size:48px}
-.apk-details{flex:1}
-.apk-details h3{font-size:16px;margin-bottom:4px}
-.apk-details p{font-size:14px;color:var(--text-light)}
-.alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px}
-.alert-success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
-.alert-error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
-.empty-state{text-align:center;padding:40px;color:var(--text-light)}
-.empty-state .icon{font-size:64px;margin-bottom:16px}
-.empty-state p{font-size:14px}
+:root{--bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;--primary:#D42B41;--primary-dark:#B02435;--primary-light:#FEE2E5;--line:#e2e8f0;--shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.04);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);}
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+.sidebar{background:linear-gradient(180deg,#1e293b 0%,#0f172a 100%);color:#e2e8f0;padding:0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;}
+.brand{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.brand h1{font-size:22px;font-weight:800;color:#fff;display:flex;align-items:center;gap:10px;}
+.brand h1::before{content:'';width:32px;height:32px;background:var(--primary);border-radius:8px;display:inline-block;}
+.brand p{font-size:12px;color:#94a3b8;margin-top:4px;padding-left:42px;}
+.nav{flex:1;padding:16px 12px;}
+.nav a{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;color:#cbd5e1;text-decoration:none;margin-bottom:4px;transition:all 0.2s;font-size:14px;font-weight:500;}
+.nav a:hover{background:rgba(255,255,255,0.08);color:#fff;}
+.nav a.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(212,43,65,0.3);}
+.nav a svg{width:20px;height:20px;flex-shrink:0;}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.08);font-size:13px;}
+.sidebar-footer a{color:#94a3b8;text-decoration:none;}
+.sidebar-footer a:hover{color:#fff;}
+.content{padding:24px 32px 40px;}
+.page-header{margin-bottom:24px;}
+.page-header h2{font-size:24px;font-weight:700;}
+.page-header p{color:var(--muted);margin-top:4px;font-size:14px;}
+.panel{background:var(--card);border-radius:12px;padding:24px;box-shadow:var(--shadow);border:1px solid var(--line);margin-bottom:20px;}
+.panel h3{font-size:16px;font-weight:600;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line);}
+.apk-card{display:flex;align-items:center;gap:20px;padding:20px;background:#f8fafc;border-radius:12px;border:1px solid var(--line);}
+.apk-icon{width:64px;height:64px;background:var(--primary-light);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;}
+.apk-info{flex:1;}
+.apk-info h4{font-size:16px;font-weight:600;margin-bottom:4px;}
+.apk-info p{font-size:13px;color:var(--muted);}
+.apk-actions{display:flex;gap:12px;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;text-decoration:none;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-dark);}
+.btn-danger{background:#ef4444;color:#fff;}
+.btn-danger:hover{background:#dc2626;}
+.btn-outline{background:transparent;color:var(--primary);border:1px solid var(--primary);}
+.btn-outline:hover{background:var(--primary-light);}
+.upload-area{border:2px dashed var(--line);border-radius:12px;padding:40px;text-align:center;transition:0.2s;background:#f8fafc;}
+.upload-area:hover{border-color:var(--primary);background:var(--primary-light);}
+.upload-area input[type="file"]{display:none;}
+.upload-area label{cursor:pointer;font-size:14px;color:var(--muted);}
+.upload-area label span{color:var(--primary);font-weight:600;}
+.empty-state{text-align:center;padding:40px;color:var(--muted);}
+.empty-state .icon{font-size:48px;margin-bottom:12px;}
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px;}
+.alert-success{background:#dcfce7;color:#166534;}
+.alert-error{background:#fee2e2;color:#991b1b;}
+.info-list{list-style:none;}
+.info-list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px;}
+.info-list li:last-child{border-bottom:none;}
+.info-list .label{color:var(--muted);min-width:80px;}
+@media(max-width:1024px){.layout{grid-template-columns:1fr;}.sidebar{height:auto;position:relative;}.sidebar .nav{display:flex;overflow-x:auto;padding:12px;gap:8px;}.sidebar .nav a{white-space:nowrap;}}
 </style>
 </head>
 <body>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand"><h1>畅观</h1><p>后台管理系统</p></div>
+        <nav class="nav">
+            <a href="/admin/dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>仪表盘</span></a>
+            <a href="/admin/ads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>广告配置</span></a>
+            <a href="/admin/channels"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>渠道管理</span></a>
+            <a href="/admin/apk" class="<?= ($currentPath=='/admin/apk')?'active':'' ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>APK 管理</span></a>
+        </nav>
+        <div class="sidebar-footer"><a href="/admin/logout">退出登录</a> · <a href="/index/index" target="_blank">访问首页</a></div>
+    </aside>
+    <main class="content">
+        <div class="page-header">
+            <h2>APK 管理</h2>
+            <p>上传和管理 Android 应用安装包，用户可通过 Web 端下载</p>
+        </div>
 
-<div class="header">
-    <div class="logo">畅观后台</div>
-    <div class="nav">
-        <a href="/admin/dashboard" class="<?= ($currentPath=='/admin/dashboard')?'active':'' ?>">仪表盘</a>
-        <a href="/admin/ads" class="<?= ($currentPath=='/admin/ads')?'active':'' ?>">广告配置</a>
-        <a href="/admin/channels" class="<?= ($currentPath=='/admin/channels')?'active':'' ?>">渠道管理</a>
-        <a href="/admin/apk" class="<?= ($currentPath=='/admin/apk')?'active':'' ?>">APK 管理</a>
-    </div>
-    <div class="user">管理员 | <a href="/admin/logout">退出登录</a> | <a href="/index/index">首页</a></div>
-</div>
-
-<div class="container">
-    <div class="panel">
-        <h2>APK 上传管理</h2>
-        
         <?php if (isset($_SESSION['success'])): ?>
         <div class="alert alert-success"><?= $_SESSION['success'] ?></div>
         <?php unset($_SESSION['success']); endif; ?>
-        
         <?php if (isset($_SESSION['error'])): ?>
         <div class="alert alert-error"><?= $_SESSION['error'] ?></div>
         <?php unset($_SESSION['error']); endif; ?>
-        
+
         <?php if ($hasApk): ?>
-        <div class="apk-info">
-            <div class="apk-icon">📱</div>
-            <div class="apk-details">
-                <h3>VideoApp.apk</h3>
-                <p>文件大小：<?= number_format($apkSize / 1024 / 1024, 2) ?> MB</p>
-                <p>上传时间：<?= $apkTime ?></p>
+        <div class="panel">
+            <h3>当前 APK</h3>
+            <div class="apk-card">
+                <div class="apk-icon">📱</div>
+                <div class="apk-info">
+                    <h4>VideoApp.apk</h4>
+                    <ul class="info-list">
+                        <li><span class="label">文件大小</span><?= number_format($apkSize / 1024 / 1024, 2) ?> MB</li>
+                        <li><span class="label">上传时间</span><?= $apkTime ?></li>
+                    </ul>
+                </div>
+                <div class="apk-actions">
+                    <a href="/VideoApp.apk" class="btn btn-primary" download>下载 APK</a>
+                    <form method="post" action="/admin/apk/delete" style="display:inline" onsubmit="return confirm('确定要删除当前 APK 吗？')">
+                        <button type="submit" class="btn btn-danger">删除</button>
+                    </form>
+                </div>
             </div>
-        </div>
-        
-        <div class="btn-group">
-            <a href="/apk/VideoApp.apk" class="btn btn-primary" download>下载 APK</a>
-            <form method="post" action="/admin/apk/delete" style="display:inline" onsubmit="return confirm('确定要删除当前 APK 吗？')">
-                <button type="submit" class="btn btn-danger">删除 APK</button>
-            </form>
-        </div>
-        <?php else: ?>
-        <div class="empty-state">
-            <div class="icon">📦</div>
-            <p>当前没有上传 APK 文件</p>
         </div>
         <?php endif; ?>
-        
-        <form method="post" action="/admin/apk/upload" enctype="multipart/form-data" style="margin-top:24px">
-            <div class="form-group">
-                <label>上传新的 APK 文件（最大 200MB）</label>
-                <input type="file" name="apk_file" accept=".apk" required>
-            </div>
-            <button type="submit" class="btn btn-primary">上传 APK</button>
-        </form>
-    </div>
-    
-    <div class="panel">
-        <h2>使用说明</h2>
-        <div style="font-size:14px;line-height:1.8;color:var(--text-light)">
-            <p>1. 上传 APK 文件后，用户可以通过 Web 端首页的下载按钮获取 App</p>
-            <p>2. 支持的格式：.apk（Android 应用安装包）</p>
-            <p>3. 文件大小限制：最大 200MB</p>
-            <p>4. 上传成功后，系统会自动替换旧的 APK 文件</p>
-        </div>
-    </div>
-</div>
 
+        <div class="panel">
+            <h3><?= $hasApk ? '上传新 APK' : '上传 APK' ?></h3>
+            <?php if (!$hasApk): ?>
+            <div class="empty-state">
+                <div class="icon">📦</div>
+                <p>当前没有上传 APK 文件</p>
+            </div>
+            <?php endif; ?>
+            <form method="post" action="/admin/apk/upload" enctype="multipart/form-data">
+                <div class="upload-area">
+                    <input type="file" name="apk_file" id="apk_file" accept=".apk" required>
+                    <label for="apk_file">
+                        <span>点击选择文件</span> 或将 APK 拖拽到此处<br>
+                        <small style="color:var(--muted);">支持 .apk 格式，最大 200MB</small>
+                    </label>
+                </div>
+                <div style="margin-top:16px;"><button type="submit" class="btn btn-primary">上传 APK</button></div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h3>使用说明</h3>
+            <ul class="info-list">
+                <li><span class="label">1.</span>上传 APK 后，用户可通过 Web 端首页的下载按钮获取 App</li>
+                <li><span class="label">2.</span>新上传的 APK 会自动替换旧文件</li>
+                <li><span class="label">3.</span>下载链接固定为 /VideoApp.apk</li>
+            </ul>
+        </div>
+    </main>
+</div>
+<script>
+document.querySelector('.upload-area').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--primary)'; });
+document.querySelector('.upload-area').addEventListener('dragleave', e => { e.currentTarget.style.borderColor = 'var(--line)'; });
+document.querySelector('.upload-area').addEventListener('drop', e => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--line)'; const file = e.dataTransfer.files[0]; if(file) { document.getElementById('apk_file').files = e.dataTransfer.files; document.querySelector('.upload-area label span').textContent = file.name; } });
+document.getElementById('apk_file').addEventListener('change', function() { if(this.files[0]) { document.querySelector('.upload-area label span').textContent = this.files[0].name; } });
+</script>
 </body>
 </html>
