@@ -339,32 +339,34 @@ class AdminController
     // 上传 APK
     public function uploadApk(Request $request)
     {
-        $this->checkLogin($request);
-        
-        $file = $request->file('apk_file');
-        if (!$file || !$file->isValid()) {
-            return (new Response(302, ['Location' => '/admin/apk?msg=apk_no_file']));
-        }
-        
-        // 检查文件类型
-        $extension = strtolower($file->getUploadExtension());
-        if ($extension !== 'apk') {
-            return (new Response(302, ['Location' => '/admin/apk?msg=apk_wrong_type']));
-        }
-        
-        // 检查文件大小（限制 200MB）
-        if ($file->getSize() > 200 * 1024 * 1024) {
-            return (new Response(302, ['Location' => '/admin/apk?msg=apk_too_large']));
-        }
-        
-        // 检查文件是否为空
-        if ($file->getSize() === 0) {
-            return (new Response(302, ['Location' => '/admin/apk?msg=apk_empty']));
-        }
-        
-        // 移动文件到 public 目录
-        $apkPath = public_path() . '/VideoApp.apk';
         try {
+            $this->checkLogin($request);
+            
+            $file = $request->file('apk_file');
+            if (!$file || !$file->isValid()) {
+                VideoLogUtils::info(['action' => 'uploadApkNoFile', 'raw' => print_r($_FILES, true)], 'admin_apk');
+                return (new Response(302, ['Location' => '/admin/apk?msg=apk_no_file']));
+            }
+            
+            // 检查文件类型
+            $extension = strtolower($file->getUploadExtension());
+            if ($extension !== 'apk') {
+                return (new Response(302, ['Location' => '/admin/apk?msg=apk_wrong_type']));
+            }
+            
+            // 检查文件大小（限制 200MB）
+            if ($file->getSize() > 200 * 1024 * 1024) {
+                return (new Response(302, ['Location' => '/admin/apk?msg=apk_too_large']));
+            }
+            
+            // 检查文件是否为空
+            if ($file->getSize() === 0) {
+                return (new Response(302, ['Location' => '/admin/apk?msg=apk_empty']));
+            }
+            
+            // 移动文件到 public 目录
+            $apkPath = public_path() . '/VideoApp.apk';
+            
             // 如果已存在旧文件，先删除
             if (file_exists($apkPath)) {
                 unlink($apkPath);
@@ -373,24 +375,31 @@ class AdminController
             $file->move($apkPath);
             
             // 校验移动后的文件
-            if (!file_exists($apkPath) || filesize($apkPath) === 0) {
+            if (!file_exists($apkPath)) {
+                VideoLogUtils::error(['action' => 'uploadApkFileNotExists', 'path' => $apkPath], 'admin_apk');
                 return (new Response(302, ['Location' => '/admin/apk?msg=apk_move_failed']));
             }
+            
+            if (filesize($apkPath) === 0) {
+                VideoLogUtils::error(['action' => 'uploadApkEmptyFile', 'path' => $apkPath], 'admin_apk');
+                return (new Response(302, ['Location' => '/admin/apk?msg=apk_move_failed']));
+            }
+            
+            VideoLogUtils::info([
+                'action' => 'uploadApk',
+                'size' => filesize($apkPath),
+                'path' => $apkPath
+            ], 'admin_apk');
+            
+            return (new Response(302, ['Location' => '/admin/apk?msg=apk_uploaded']));
         } catch (\Exception $e) {
             VideoLogUtils::error([
                 'action' => 'uploadApkError',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ], 'admin_apk');
             return (new Response(302, ['Location' => '/admin/apk?msg=apk_error']));
         }
-        
-        VideoLogUtils::info([
-            'action' => 'uploadApk',
-            'size' => $file->getSize(),
-            'path' => $apkPath
-        ], 'admin_apk');
-        
-        return (new Response(302, ['Location' => '/admin/apk?msg=apk_uploaded']));
     }
 
     // 删除 APK

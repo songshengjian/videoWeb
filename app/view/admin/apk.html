@@ -163,77 +163,110 @@ $m = $msgMap[$msg] ?? null;
     </main>
 </div>
 <script>
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('apk_file');
-const fileNameSpan = document.getElementById('fileName');
-const uploadForm = document.getElementById('uploadForm');
-const uploadProgress = document.getElementById('uploadProgress');
-const progressBar = document.getElementById('progressBar');
-const progressText = document.getElementById('progressText');
-const uploadBtn = document.getElementById('uploadBtn');
+// 版本 v2 - 防止浏览器缓存
+(function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('apk_file');
+    const fileNameSpan = document.getElementById('fileName');
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const uploadBtn = document.getElementById('uploadBtn');
 
-function updateFileDisplay(file) {
-    if (file) {
-        fileNameSpan.textContent = file.name;
-    }
-}
-
-uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor = 'var(--primary)'; });
-uploadArea.addEventListener('dragleave', e => { uploadArea.style.borderColor = 'var(--line)'; });
-uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.style.borderColor = 'var(--line)'; const file = e.dataTransfer.files[0]; if(file) { fileInput.files = e.dataTransfer.files; updateFileDisplay(file); } });
-fileInput.addEventListener('change', function() { updateFileDisplay(this.files[0]); });
-
-uploadForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    if (!fileInput.files[0]) {
-        alert('请先选择要上传的 APK 文件');
+    if (!uploadForm) {
+        console.error('Upload form not found');
         return;
     }
 
-    const file = fileInput.files[0];
-    const formData = new FormData();
-    formData.append('apk_file', file);
+    function updateFileDisplay(file) {
+        if (file) {
+            fileNameSpan.textContent = file.name;
+            console.log('File selected:', file.name, file.size, 'bytes');
+        }
+    }
 
-    uploadBtn.disabled = true;
-    uploadBtn.textContent = '上传中...';
-    uploadProgress.style.display = 'block';
-    progressBar.style.width = '0%';
-    progressText.textContent = '准备上传...';
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/admin/apk/upload');
-
-    xhr.upload.addEventListener('progress', function(e) {
-        if (e.lengthComputable) {
-            const percent = Math.round((e.loaded / e.total) * 100);
-            progressBar.style.width = percent + '%';
-            progressText.textContent = '上传中 ' + percent + '%';
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--primary)';
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        uploadArea.style.borderColor = 'var(--line)';
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--line)';
+        var file = e.dataTransfer.files[0];
+        if (file) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileDisplay(file);
+        }
+    });
+    
+    fileInput.addEventListener('change', function() {
+        if (this.files[0]) {
+            updateFileDisplay(this.files[0]);
         }
     });
 
-    xhr.addEventListener('load', function() {
-        if (xhr.status >= 200 && xhr.status < 400) {
-            progressText.textContent = '上传完成，正在刷新...';
-            setTimeout(function() {
-                window.location.reload();
-            }, 500);
-        } else {
+    uploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        console.log('Submit triggered');
+        
+        if (!fileInput.files || !fileInput.files[0]) {
+            alert('请先选择要上传的 APK 文件');
+            console.log('No file selected');
+            return;
+        }
+
+        var file = fileInput.files[0];
+        var formData = new FormData();
+        formData.append('apk_file', file);
+
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = '上传中...';
+        uploadProgress.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressText.textContent = '准备上传...';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/admin/apk/upload');
+
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                var percent = Math.round((e.loaded / e.total) * 100);
+                progressBar.style.width = percent + '%';
+                progressText.textContent = '上传中 ' + percent + '%';
+            }
+        });
+
+        xhr.addEventListener('load', function() {
+            console.log('Upload complete, status:', xhr.status);
+            if (xhr.status >= 200 && xhr.status < 400) {
+                progressText.textContent = '上传完成，正在刷新...';
+                setTimeout(function() {
+                    window.location.reload();
+                }, 500);
+            } else {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '上传 APK';
+                uploadProgress.style.display = 'none';
+                alert('上传失败，服务器返回错误：' + xhr.status);
+            }
+        });
+
+        xhr.addEventListener('error', function() {
             uploadBtn.disabled = false;
             uploadBtn.textContent = '上传 APK';
             uploadProgress.style.display = 'none';
-            alert('上传失败，服务器返回错误：' + xhr.status);
-        }
-    });
+            alert('上传失败，网络错误');
+        });
 
-    xhr.addEventListener('error', function() {
-        uploadBtn.disabled = false;
-        uploadBtn.textContent = '上传 APK';
-        uploadProgress.style.display = 'none';
-        alert('上传失败，网络错误');
+        xhr.send(formData);
     });
-
-    xhr.send(formData);
-});
+})();
 </script>
 </body>
 </html>
