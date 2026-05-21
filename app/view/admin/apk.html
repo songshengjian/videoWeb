@@ -71,6 +71,9 @@ $msgMap = [
     'apk_no_file' => ['type' => 'error', 'text' => '请选择要上传的 APK 文件'],
     'apk_wrong_type' => ['type' => 'error', 'text' => '请上传 .apk 格式的文件'],
     'apk_too_large' => ['type' => 'error', 'text' => 'APK 文件大小不能超过 200MB'],
+    'apk_empty' => ['type' => 'error', 'text' => 'APK 文件为空，请选择有效文件'],
+    'apk_move_failed' => ['type' => 'error', 'text' => '文件保存失败，请重试'],
+    'apk_error' => ['type' => 'error', 'text' => '上传过程发生错误，请重试'],
 ];
 $msg = $_GET['msg'] ?? '';
 $m = $msgMap[$msg] ?? null;
@@ -207,8 +210,10 @@ uploadForm.addEventListener('submit', async function(e) {
 
     xhr.addEventListener('load', function() {
         if (xhr.status >= 200 && xhr.status < 400) {
-            const redirectUrl = xhr.getResponseHeader('Location');
-            window.location.href = redirectUrl || '/admin/apk?msg=upload_error';
+            progressText.textContent = '上传完成，正在刷新...';
+            setTimeout(function() {
+                window.location.reload();
+            }, 500);
         } else {
             uploadBtn.disabled = false;
             uploadBtn.textContent = '上传 APK';

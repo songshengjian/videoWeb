@@ -357,9 +357,27 @@ class AdminController
             return (new Response(302, ['Location' => '/admin/apk?msg=apk_too_large']));
         }
         
+        // 检查文件是否为空
+        if ($file->getSize() === 0) {
+            return (new Response(302, ['Location' => '/admin/apk?msg=apk_empty']));
+        }
+        
         // 移动文件到 public 目录
         $apkPath = public_path() . '/VideoApp.apk';
-        $file->move($apkPath, true);
+        try {
+            $file->move($apkPath, true);
+            
+            // 校验移动后的文件
+            if (!file_exists($apkPath) || filesize($apkPath) === 0) {
+                return (new Response(302, ['Location' => '/admin/apk?msg=apk_move_failed']));
+            }
+        } catch (\Exception $e) {
+            VideoLogUtils::error([
+                'action' => 'uploadApkError',
+                'message' => $e->getMessage()
+            ], 'admin_apk');
+            return (new Response(302, ['Location' => '/admin/apk?msg=apk_error']));
+        }
         
         VideoLogUtils::info([
             'action' => 'uploadApk',
