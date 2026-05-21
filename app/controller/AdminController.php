@@ -312,4 +312,79 @@ class AdminController
         }
         return 'green';
     }
+
+    // APK 管理页
+    public function apkPage(Request $request)
+    {
+        $this->checkLogin($request);
+        
+        $apkDir = public_path();
+        $apkFile = $apkDir . '/VideoApp.apk';
+        
+        $hasApk = file_exists($apkFile);
+        $apkSize = $hasApk ? filesize($apkFile) : 0;
+        $apkTime = $hasApk ? date('Y-m-d H:i:s', filemtime($apkFile)) : '';
+        
+        return view('admin/apk', [
+            'currentPath' => $request->path(),
+            'hasApk' => $hasApk,
+            'apkSize' => $apkSize,
+            'apkTime' => $apkTime,
+            'theme' => $this->getTheme(),
+        ]);
+    }
+
+    // 上传 APK
+    public function uploadApk(Request $request)
+    {
+        $this->checkLogin($request);
+        
+        $file = $request->file('apk_file');
+        if (!$file || !$file->isValid()) {
+            return redirect('/admin/apk')->with('error', '请选择要上传的 APK 文件');
+        }
+        
+        // 检查文件类型
+        $extension = strtolower($file->getUploadExtension());
+        if ($extension !== 'apk') {
+            return redirect('/admin/apk')->with('error', '请上传 .apk 格式的文件');
+        }
+        
+        // 检查文件大小（限制 200MB）
+        if ($file->getSize() > 200 * 1024 * 1024) {
+            return redirect('/admin/apk')->with('error', 'APK 文件大小不能超过 200MB');
+        }
+        
+        // 创建目录
+        $apkDir = public_path() . '/apk/';
+        if (!is_dir($apkDir)) {
+            mkdir($apkDir, 0755, true);
+        }
+        
+        // 移动文件
+        $apkPath = public_path() . '/VideoApp.apk';
+        $file->move($apkPath);
+        
+        VideoLogUtils::info([
+            'action' => 'uploadApk',
+            'size' => $file->getSize(),
+            'path' => $apkPath
+        ], 'admin_apk');
+        
+        return redirect('/admin/apk')->with('success', 'APK 上传成功');
+    }
+
+    // 删除 APK
+    public function deleteApk(Request $request)
+    {
+        $this->checkLogin($request);
+        
+        $apkPath = public_path() . '/VideoApp.apk';
+        if (file_exists($apkPath)) {
+            unlink($apkPath);
+            VideoLogUtils::info(['action' => 'deleteApk'], 'admin_apk');
+        }
+        
+        return redirect('/admin/apk')->with('success', 'APK 已删除');
+    }
 }

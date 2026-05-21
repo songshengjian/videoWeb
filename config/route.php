@@ -47,6 +47,11 @@ Route::post('/admin/ads', [AdminController::class, 'saveAds']);
 Route::get('/admin/channels', [AdminController::class, 'channelsPage']);
 Route::post('/admin/channels', [AdminController::class, 'saveChannels']);
 
+// APK 管理
+Route::get('/admin/apk', [AdminController::class, 'apkPage']);
+Route::post('/admin/apk/upload', [AdminController::class, 'uploadApk']);
+Route::post('/admin/apk/delete', [AdminController::class, 'deleteApk']);
+
 // 前端读取广告
 Route::get('/ads.json', [IndexController::class, 'getAds']);
 

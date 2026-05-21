@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>APK 管理</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+    --bg:#f3f8f4;
+    --card:#ffffff;
+    --primary:#D42B41;
+    --primary-dark:#B02435;
+    --text:#333;
+    --text-light:#666;
+    --border:#e0e0e0;
+    --shadow:0 2px 12px rgba(0,0,0,0.08);
+}
+<?php if ($theme === 'winter'): ?>
+:root{ --bg:#f5f7fa; --card:#ffffff; --primary:#2563eb; --primary-dark:#1d4ed8; }
+<?php elseif ($theme === 'finance'): ?>
+:root{ --bg:#fdf8f0; --card:#ffffff; --primary:#d97706; --primary-dark:#b45309; }
+<?php elseif ($theme === 'tech'): ?>
+:root{ --bg:#0f172a; --card:#1e293b; --primary:#22c55e; --primary-dark:#16a34a; --text:#e2e8f0; --text-light:#94a3b8; --border:#334155; }
+<?php endif; ?>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--card);box-shadow:var(--shadow);padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+.header .logo{font-size:20px;font-weight:bold;color:var(--primary)}
+.nav{display:flex;gap:8px}
+.nav a{padding:8px 16px;border-radius:8px;text-decoration:none;color:var(--text);font-size:14px;transition:0.2s}
+.nav a:hover,.nav a.active{background:var(--primary);color:#fff}
+.container{max-width:800px;margin:40px auto;padding:0 20px}
+.panel{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:24px;margin-bottom:24px}
+.panel h2{font-size:18px;margin-bottom:16px;color:var(--primary-dark)}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:14px;color:var(--text-light);margin-bottom:8px}
+.form-group input[type="file"]{width:100%;padding:12px;border:2px dashed var(--border);border-radius:8px;background:var(--bg);cursor:pointer}
+.form-group input[type="file"]:hover{border-color:var(--primary)}
+.btn{padding:12px 24px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:0.2s;font-weight:bold}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-danger{background:#ef4444;color:#fff}
+.btn-danger:hover{background:#dc2626}
+.btn-group{display:flex;gap:12px;margin-top:16px}
+.apk-info{display:flex;align-items:center;gap:16px;padding:16px;background:var(--bg);border-radius:8px;margin-top:16px}
+.apk-icon{font-size:48px}
+.apk-details{flex:1}
+.apk-details h3{font-size:16px;margin-bottom:4px}
+.apk-details p{font-size:14px;color:var(--text-light)}
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px}
+.alert-success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
+.alert-error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+.empty-state{text-align:center;padding:40px;color:var(--text-light)}
+.empty-state .icon{font-size:64px;margin-bottom:16px}
+.empty-state p{font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">畅观后台</div>
+    <div class="nav">
+        <a href="/admin/dashboard" class="<?= ($currentPath=='/admin/dashboard')?'active':'' ?>">仪表盘</a>
+        <a href="/admin/ads" class="<?= ($currentPath=='/admin/ads')?'active':'' ?>">广告配置</a>
+        <a href="/admin/channels" class="<?= ($currentPath=='/admin/channels')?'active':'' ?>">渠道管理</a>
+        <a href="/admin/apk" class="<?= ($currentPath=='/admin/apk')?'active':'' ?>">APK 管理</a>
+    </div>
+    <div class="user">管理员 | <a href="/admin/logout">退出登录</a> | <a href="/index/index">首页</a></div>
+</div>
+
+<div class="container">
+    <div class="panel">
+        <h2>APK 上传管理</h2>
+        
+        <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success"><?= $_SESSION['success'] ?></div>
+        <?php unset($_SESSION['success']); endif; ?>
+        
+        <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-error"><?= $_SESSION['error'] ?></div>
+        <?php unset($_SESSION['error']); endif; ?>
+        
+        <?php if ($hasApk): ?>
+        <div class="apk-info">
+            <div class="apk-icon">📱</div>
+            <div class="apk-details">
+                <h3>VideoApp.apk</h3>
+                <p>文件大小：<?= number_format($apkSize / 1024 / 1024, 2) ?> MB</p>
+                <p>上传时间：<?= $apkTime ?></p>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <a href="/apk/VideoApp.apk" class="btn btn-primary" download>下载 APK</a>
+            <form method="post" action="/admin/apk/delete" style="display:inline" onsubmit="return confirm('确定要删除当前 APK 吗？')">
+                <button type="submit" class="btn btn-danger">删除 APK</button>
+            </form>
+        </div>
+        <?php else: ?>
+        <div class="empty-state">
+            <div class="icon">📦</div>
+            <p>当前没有上传 APK 文件</p>
+        </div>
+        <?php endif; ?>
+        
+        <form method="post" action="/admin/apk/upload" enctype="multipart/form-data" style="margin-top:24px">
+            <div class="form-group">
+                <label>上传新的 APK 文件（最大 200MB）</label>
+                <input type="file" name="apk_file" accept=".apk" required>
+            </div>
+            <button type="submit" class="btn btn-primary">上传 APK</button>
+        </form>
+    </div>
+    
+    <div class="panel">
+        <h2>使用说明</h2>
+        <div style="font-size:14px;line-height:1.8;color:var(--text-light)">
+            <p>1. 上传 APK 文件后，用户可以通过 Web 端首页的下载按钮获取 App</p>
+            <p>2. 支持的格式：.apk（Android 应用安装包）</p>
+            <p>3. 文件大小限制：最大 200MB</p>
+            <p>4. 上传成功后，系统会自动替换旧的 APK 文件</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
