@@ -117,7 +117,7 @@ class AdminController
         }
         $file = runtime_path() . '/admin_theme.json';
         file_put_contents($file, json_encode(['theme' => $theme], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-        return redirect('/admin/dashboard');
+        return redirect('/admin/dashboard?msg=主题已保存');
     }
 
     // 保存渠道配置
@@ -184,7 +184,7 @@ class AdminController
         Cache::delete('useChannel');
         Cache::delete('useNav');
 
-        return redirect('/admin/channels');
+        return redirect('/admin/channels?msg=channels_saved');
     }
 
     // 保存广告
@@ -253,9 +253,10 @@ class AdminController
         
         if ($result === false) {
             VideoLogUtils::warning("Failed to write ads to $adsFile", 'admin_ads');
+            return redirect('/admin/ads?msg=ads_error');
         }
 
-        return redirect('/admin/ads');
+        return redirect('/admin/ads?msg=ads_saved');
     }
 
     // 退出登录
@@ -341,18 +342,18 @@ class AdminController
         
         $file = $request->file('apk_file');
         if (!$file || !$file->isValid()) {
-            return redirect('/admin/apk')->with('error', '请选择要上传的 APK 文件');
+            return redirect('/admin/apk?msg=apk_no_file');
         }
         
         // 检查文件类型
         $extension = strtolower($file->getUploadExtension());
         if ($extension !== 'apk') {
-            return redirect('/admin/apk')->with('error', '请上传 .apk 格式的文件');
+            return redirect('/admin/apk?msg=apk_wrong_type');
         }
         
         // 检查文件大小（限制 200MB）
         if ($file->getSize() > 200 * 1024 * 1024) {
-            return redirect('/admin/apk')->with('error', 'APK 文件大小不能超过 200MB');
+            return redirect('/admin/apk?msg=apk_too_large');
         }
         
         // 创建目录
@@ -371,7 +372,7 @@ class AdminController
             'path' => $apkPath
         ], 'admin_apk');
         
-        return redirect('/admin/apk')->with('success', 'APK 上传成功');
+        return redirect('/admin/apk?msg=apk_uploaded');
     }
 
     // 删除 APK
@@ -385,6 +386,6 @@ class AdminController
             VideoLogUtils::info(['action' => 'deleteApk'], 'admin_apk');
         }
         
-        return redirect('/admin/apk')->with('success', 'APK 已删除');
+        return redirect('/admin/apk?msg=apk_deleted');
     }
 }

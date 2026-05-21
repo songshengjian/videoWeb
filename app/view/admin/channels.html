@@ -9,39 +9,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root{--bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;--primary:#D42B41;--primary-dark:#B02435;--primary-light:#FEE2E5;--line:#e2e8f0;--shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.04);}
+body[data-theme="winter"]{--primary:#2563eb;--primary-dark:#1d4ed8;--primary-light:#DBEAFE;}
+body[data-theme="finance"]{--primary:#d97706;--primary-dark:#b45309;--primary-light:#FEF3C7;}
+body[data-theme="tech"]{--primary:#7c3aed;--primary-dark:#6d28d9;--primary-light:#EDE9FE;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);}
+body{font-family:"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
 .sidebar{background:linear-gradient(180deg,#1e293b 0%,#0f172a 100%);color:#e2e8f0;padding:0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;}
 .brand{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
-.brand h1{font-size:22px;font-weight:800;color:#fff;display:flex;align-items:center;gap:10px;}
-.brand h1::before{content:'';width:32px;height:32px;background:var(--primary);border-radius:8px;display:inline-block;}
-.brand p{font-size:12px;color:#94a3b8;margin-top:4px;padding-left:42px;}
+.brand h1{font-size:22px;font-weight:800;color:#fff;display:flex;align-items:center;gap:12px;}
+.brand-icon{width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0;}
+.brand-icon img{width:100%;height:100%;object-fit:cover;}
+.brand p{font-size:12px;color:#94a3b8;margin-top:4px;padding-left:48px;}
 .nav{flex:1;padding:16px 12px;}
 .nav a{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;color:#cbd5e1;text-decoration:none;margin-bottom:4px;transition:all 0.2s;font-size:14px;font-weight:500;}
 .nav a:hover{background:rgba(255,255,255,0.08);color:#fff;}
 .nav a.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(212,43,65,0.3);}
 .nav a svg{width:20px;height:20px;flex-shrink:0;}
 .sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.08);font-size:13px;}
-.sidebar-footer a{color:#94a3b8;text-decoration:none;}
+.sidebar-footer a{color:#94a3b8;text-decoration:none;transition:0.2s;}
 .sidebar-footer a:hover{color:#fff;}
 .content{padding:24px 32px 40px;}
 .page-header{margin-bottom:24px;}
-.page-header h2{font-size:24px;font-weight:700;}
+.page-header h2{font-size:24px;font-weight:700;color:var(--text);}
 .page-header p{color:var(--muted);margin-top:4px;font-size:14px;}
-.panel{background:var(--card);border-radius:12px;padding:24px;box-shadow:var(--shadow);border:1px solid var(--line);margin-bottom:20px;}
-.panel h3{font-size:16px;font-weight:600;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line);}
+.panel{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:24px;border:1px solid var(--line);margin-bottom:20px;}
+.panel h3{font-size:16px;font-weight:600;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line);color:var(--text);}
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:14px;}
 th{text-align:left;padding:12px 16px;background:#f8fafc;color:var(--muted);font-weight:600;font-size:13px;border-bottom:1px solid var(--line);}
 td{padding:12px 16px;border-bottom:1px solid var(--line);}
 tr:hover td{background:#f8fafc;}
 input[type="text"],input[type="number"]{width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:6px;font-size:13px;}
-input[type="text"]:focus,input[type="number"]:focus{outline:none;border-color:var(--primary);}
+input[type="text"]:focus,input[type="number"]:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
 input[type="checkbox"]{width:16px;height:16px;accent-color:var(--primary);}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;text-decoration:none;}
 .btn-primary{background:var(--primary);color:#fff;}
-.btn-primary:hover{background:var(--primary-dark);}
+.btn-primary:hover{background:var(--primary-dark);box-shadow:0 2px 8px rgba(212,43,65,0.3);}
 .btn-sm{padding:6px 12px;font-size:13px;}
 .btn-danger{background:#ef4444;color:#fff;}
 .btn-danger:hover{background:#dc2626;}
@@ -49,13 +53,30 @@ input[type="checkbox"]{width:16px;height:16px;accent-color:var(--primary);}
 .badge{display:inline-flex;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;}
 .badge-success{background:#dcfce7;color:#166534;}
 .badge-disabled{background:#fee2e2;color:#991b1b;}
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px;display:flex;align-items:center;gap:8px;}
+.alert-success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
+.alert-error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;}
 @media(max-width:1024px){.layout{grid-template-columns:1fr;}.sidebar{height:auto;position:relative;}.sidebar .nav{display:flex;overflow-x:auto;padding:12px;gap:8px;}.sidebar .nav a{white-space:nowrap;}}
 </style>
 </head>
-<body>
+<body data-theme="<?= htmlspecialchars($theme ?? 'green') ?>">
+<?php
+$msgMap = ['channels_saved' => ['type' => 'success', 'text' => '渠道配置已保存']];
+$msg = $_GET['msg'] ?? '';
+$m = $msgMap[$msg] ?? null;
+?>
+<?php if ($m): ?>
+<div style="padding:24px 32px 0;"><div class="alert alert-<?= $m['type'] ?>"><?= $m['type'] === 'success' ? '✅' : '❌' ?> <?= $m['text'] ?></div></div>
+<?php endif; ?>
 <div class="layout">
     <aside class="sidebar">
-        <div class="brand"><h1>畅观</h1><p>后台管理系统</p></div>
+        <div class="brand">
+            <h1>
+                <span class="brand-icon"><img src="/favicon.svg" alt="畅观"></span>
+                畅观
+            </h1>
+            <p>后台管理系统</p>
+        </div>
         <nav class="nav">
             <a href="/admin/dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>仪表盘</span></a>
             <a href="/admin/ads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>广告配置</span></a>
