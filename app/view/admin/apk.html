@@ -148,7 +148,7 @@ $m = $msgMap[$msg] ?? null;
                     </div>
                     <p id="progressText" style="text-align:center;margin-top:8px;font-size:13px;color:var(--muted);">上传中...</p>
                 </div>
-                <div style="margin-top:16px;"><button type="button" class="btn btn-primary" id="uploadBtn" onclick="handleUpload()">上传 APK</button></div>
+                <div style="margin-top:16px;"><button type="button" class="btn btn-primary" id="uploadBtn" onclick="var input=document.getElementById('apk_file');if(!input||!input.files||input.files.length===0){alert('请先选择要上传的 APK 文件！');return false;}else{uploadFile();return false;}">上传 APK</button></div>
             </form>
         </div>
 
@@ -163,12 +163,10 @@ $m = $msgMap[$msg] ?? null;
     </main>
 </div>
 <script>
-// 版本 v3 - 直接验证
 (function() {
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('apk_file');
     const fileNameSpan = document.getElementById('fileName');
-    const uploadForm = document.getElementById('uploadForm');
     const uploadProgress = document.getElementById('uploadProgress');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
@@ -206,19 +204,8 @@ $m = $msgMap[$msg] ?? null;
         }
     });
 
-    window.handleUpload = function() {
-        console.log('handleUpload called, files:', fileInput.files);
-        
-        if (!fileInput.files || fileInput.files.length === 0) {
-            alert('请先选择要上传的 APK 文件！');
-            return false;
-        }
-        
-        doUpload();
-        return false;
-    };
-
-    function doUpload() {
+    window.uploadFile = function() {
+        console.log('uploadFile called');
         var file = fileInput.files[0];
         var formData = new FormData();
         formData.append('apk_file', file);
@@ -263,7 +250,7 @@ $m = $msgMap[$msg] ?? null;
         });
 
         xhr.send(formData);
-    }
+    };
 })();
 </script>
 </body>
