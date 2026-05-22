@@ -401,6 +401,87 @@ class IndexController
     }
     
     /**
+     * 获取所有渠道的视频详情
+     */
+    public function getVideoDetailAllChannels(Request $request)
+    {
+        $ids = $request->get('ids', '');
+        
+        if (empty($ids)) {
+            return json(['code' => 0, 'msg' => '视频 ID 不能为空', 'list' => []]);
+        }
+        
+        $channelsJson = VideoUtils::channels();
+        $channels = json_decode($channelsJson, true);
+        $channelList = $channels['list'] ?? [];
+        
+        $apiSearchable = ['量子资源', '暴风资源', '如意', '360', '魔都', '1080资源库', '非凡资源', 'IKUN资源', '电影天堂资源', '豆瓣资源', '影剧资源', '爱奇艺资源'];
+        
+        $allResults = [];
+        
+        foreach ($channelList as $channel) {
+            if (($channel['channel_status'] ?? '0') != '1') {
+                continue;
+            }
+            
+            $channelName = $channel['channel_name'] ?? '';
+            
+            if (!in_array($channelName, $apiSearchable, true)) {
+                continue;
+            }
+            
+            $url = rtrim($channel['channel_url'], '/') . '/?ac=detail&wd=&ids=' . $ids;
+            
+            $options = [
+                'http' => [
+                    'method'  => 'GET',
+                    'header'  => [
+                        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                        "Accept: application/json",
+                    ],
+                    'timeout' => 8,
+                ]
+            ];
+            $context = stream_context_create($options);
+            $resp = @file_get_contents($url, false, $context);
+            
+            if ($resp !== false && strlen($resp) > 10) {
+                $data = json_decode($resp, true);
+                if (is_array($data) && isset($data['code']) && $data['code'] == 1 && !empty($data['list'])) {
+                    foreach ($data['list'] as $item) {
+                        $item['_channel_name'] = $channelName;
+                        $item['_channel_id'] = $channel['channel_id'];
+                        $allResults[] = $item;
+                    }
+                }
+            }
+        }
+        
+        if (empty($allResults)) {
+            return json(['code' => 0, 'msg' => '未找到视频', 'list' => []]);
+        }
+        
+        // 合并所有渠道的播放源
+        $mergedVideo = $allResults[0];
+        $playFrom = [];
+        $playUrl = [];
+        
+        foreach ($allResults as $result) {
+            if (!empty($result['vod_play_from']) && !empty($result['vod_play_url'])) {
+                $playFrom[] = $result['vod_play_from'];
+                $playUrl[] = $result['vod_play_url'];
+            }
+        }
+        
+        if (!empty($playFrom)) {
+            $mergedVideo['vod_play_from'] = implode('$$$', $playFrom);
+            $mergedVideo['vod_play_url'] = implode('$$$', $playUrl);
+        }
+        
+        return json(['code' => 1, 'msg' => 'success', 'list' => [$mergedVideo]]);
+    }
+    
+    /**
      * 用户登录
      */
     public function userLogin(Request $request)

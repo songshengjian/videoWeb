@@ -27,6 +27,7 @@ Route::get('/api/video/list', [IndexController::class, 'getVideoList']);
 Route::get('/api/video/type', [IndexController::class, 'getVideoTypes']);
 Route::get('/api/video/search', [IndexController::class, 'searchVideos']);
 Route::get('/api/video/detail', [IndexController::class, 'getVideoDetail']);
+Route::get('/api/video/detail-all', [IndexController::class, 'getVideoDetailAllChannels']);
 
 // 用户 API 路由
 Route::post('/api/user/login', [IndexController::class, 'userLogin']);
