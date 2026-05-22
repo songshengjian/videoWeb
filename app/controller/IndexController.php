@@ -241,7 +241,7 @@ class IndexController
     {
         $keyword = $request->get('wd', '');
         $page = (int)$request->get('page', 1);
-        $limit = (int)$request->get('limit', 20);
+        $limit = (int)$request->get('limit', 100);
         
         if (empty($keyword)) {
             return json(['code' => 0, 'msg' => '搜索关键词不能为空', 'list' => [], 'total' => 0, 'page' => $page, 'pagecount' => 0]);
@@ -256,7 +256,7 @@ class IndexController
         $searchedChannels = [];
         
         // API 搜索频道（支持标准搜索接口）
-        $apiSearchable = ['如意', '魔都', '1080资源库', '非凡资源', 'IKUN资源', '电影天堂资源', '豆瓣资源', '影剧资源', '爱奇艺资源'];
+        $apiSearchable = ['量子资源', '暴风资源', '如意', '360', '魔都', '1080资源库', '非凡资源', 'IKUN资源', '电影天堂资源', '豆瓣资源', '影剧资源', '爱奇艺资源'];
         
         foreach ($channelList as $channel) {
             if (($channel['channel_status'] ?? '0') != '1') {
@@ -270,7 +270,7 @@ class IndexController
                 continue;
             }
             
-            $url = rtrim($channel['channel_url'], '/') . '/?ac=detail&wd=' . urlencode($keyword) . '&pg=' . $page . '&limit=' . $limit;
+            $url = rtrim($channel['channel_url'], '/') . '/?ac=detail&wd=' . urlencode($keyword) . '&pg=' . $page;
             
             $options = [
                 'http' => [
@@ -295,7 +295,7 @@ class IndexController
                             $item['_channel_id'] = $channel['channel_id'];
                             $allResults[] = $item;
                         }
-                        $totalResults += (int)($data['total'] ?? 0);
+                        $totalResults += (int)($data['total'] ?? count($list));
                     }
                     $searchedChannels[] = $channelName;
                 }
