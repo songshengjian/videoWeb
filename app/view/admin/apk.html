@@ -134,9 +134,9 @@ $m = $msgMap[$msg] ?? null;
                 <p>当前没有上传 APK 文件</p>
             </div>
             <?php endif; ?>
-            <form id="uploadForm" method="post" action="/admin/apk/upload" enctype="multipart/form-data">
+            <form id="uploadForm" onsubmit="return handleUpload();">
                 <div class="upload-area" id="uploadArea">
-                    <input type="file" name="apk_file" id="apk_file" accept=".apk" required>
+                    <input type="file" name="apk_file" id="apk_file" accept=".apk">
                     <label for="apk_file">
                         <span id="fileName">点击选择文件</span> 或将 APK 拖拽到此处<br>
                         <small style="color:var(--muted);">支持 .apk 格式，最大 200MB</small>
@@ -148,7 +148,7 @@ $m = $msgMap[$msg] ?? null;
                     </div>
                     <p id="progressText" style="text-align:center;margin-top:8px;font-size:13px;color:var(--muted);">上传中...</p>
                 </div>
-                <div style="margin-top:16px;"><button type="submit" class="btn btn-primary" id="uploadBtn">上传 APK</button></div>
+                <div style="margin-top:16px;"><button type="button" class="btn btn-primary" id="uploadBtn" onclick="handleUpload()">上传 APK</button></div>
             </form>
         </div>
 
@@ -163,7 +163,7 @@ $m = $msgMap[$msg] ?? null;
     </main>
 </div>
 <script>
-// 版本 v2 - 防止浏览器缓存
+// 版本 v3 - 直接验证
 (function() {
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('apk_file');
@@ -173,11 +173,6 @@ $m = $msgMap[$msg] ?? null;
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
     const uploadBtn = document.getElementById('uploadBtn');
-
-    if (!uploadForm) {
-        console.error('Upload form not found');
-        return;
-    }
 
     function updateFileDisplay(file) {
         if (file) {
@@ -211,16 +206,19 @@ $m = $msgMap[$msg] ?? null;
         }
     });
 
-    uploadForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        console.log('Submit triggered');
+    window.handleUpload = function() {
+        console.log('handleUpload called, files:', fileInput.files);
         
-        if (!fileInput.files || !fileInput.files[0]) {
-            alert('请先选择要上传的 APK 文件');
-            console.log('No file selected');
-            return;
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert('请先选择要上传的 APK 文件！');
+            return false;
         }
+        
+        doUpload();
+        return false;
+    };
 
+    function doUpload() {
         var file = fileInput.files[0];
         var formData = new FormData();
         formData.append('apk_file', file);
@@ -265,7 +263,7 @@ $m = $msgMap[$msg] ?? null;
         });
 
         xhr.send(formData);
-    });
+    }
 })();
 </script>
 </body>
