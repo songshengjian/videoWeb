@@ -255,8 +255,12 @@ class IndexController
         $totalResults = 0;
         $searchedChannels = [];
         
-        // API 搜索频道（支持标准搜索接口）
-        $apiSearchable = ['量子资源', '暴风资源', '如意', '360', '魔都', '1080资源库', '非凡资源', 'IKUN资源', '电影天堂资源', '豆瓣资源', '影剧资源', '爱奇艺资源'];
+        // 自动获取所有启用的频道，不再硬编码
+        $apiSearchable = array_filter(array_map(function($ch) {
+            return $ch['channel_name'] ?? '';
+        }, $channelList), function($name) {
+            return !empty($name);
+        });
         
         foreach ($channelList as $channel) {
             if (($channel['channel_status'] ?? '0') != '1') {
@@ -415,8 +419,12 @@ class IndexController
         $channels = json_decode($channelsJson, true);
         $channelList = $channels['list'] ?? [];
         
-        // 和搜索接口一样，只用这些渠道
-        $apiSearchable = ['量子资源', '暴风资源', '如意', '360', '魔都', '1080资源库', '非凡资源', 'IKUN资源', '电影天堂资源', '豆瓣资源', '影剧资源', '爱奇艺资源'];
+        // 自动获取所有启用的频道，不再硬编码
+        $apiSearchable = array_filter(array_map(function($ch) {
+            return $ch['channel_name'] ?? '';
+        }, $channelList), function($name) {
+            return !empty($name);
+        });
         
         $allResults = [];
         
