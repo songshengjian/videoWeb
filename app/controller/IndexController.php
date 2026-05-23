@@ -459,21 +459,42 @@ class IndexController
             return json(['code' => 0, 'msg' => '未找到视频', 'list' => []]);
         }
         
-        // 合并所有渠道的播放源
+        // 合并所有渠道的播放源，并创建名称映射
         $mergedVideo = $allResults[0];
         $playFrom = [];
         $playUrl = [];
+        $sourceNameMap = [];
+        
+        // 创建第三方名称到渠道名称的映射
+        $channelNameMap = [];
+        foreach ($channelList as $ch) {
+            $channelNameMap[$ch['channel_name']] = $ch['channel_name'];
+        }
         
         foreach ($allResults as $result) {
             if (!empty($result['vod_play_from']) && !empty($result['vod_play_url'])) {
                 $playFrom[] = $result['vod_play_from'];
                 $playUrl[] = $result['vod_play_url'];
+                
+                // 记录第三方名称到渠道名称的映射
+                $channelName = $result['_channel_name'] ?? '';
+                if ($channelName) {
+                    $sources = explode('$$$', $result['vod_play_from']);
+                    foreach ($sources as $src) {
+                        $src = trim($src);
+                        if ($src && !isset($sourceNameMap[$src])) {
+                            $sourceNameMap[$src] = $channelName;
+                        }
+                    }
+                }
             }
         }
         
         if (!empty($playFrom)) {
             $mergedVideo['vod_play_from'] = implode('$$$', $playFrom);
             $mergedVideo['vod_play_url'] = implode('$$$', $playUrl);
+            // 添加渠道名称映射
+            $mergedVideo['vod_play_from_map'] = $sourceNameMap;
         }
         
         return json(['code' => 1, 'msg' => 'success', 'list' => [$mergedVideo]]);
