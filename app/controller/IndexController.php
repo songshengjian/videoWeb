@@ -473,41 +473,55 @@ class IndexController
         
         // 合并所有渠道的播放源，并创建名称映射
         $mergedVideo = $allResults[0];
-        $playFrom = [];
-        $playUrl = [];
-        $sourceNameMap = [];
-        
-        // 创建第三方名称到渠道名称的映射
-        $channelNameMap = [];
-        foreach ($channelList as $ch) {
-            $channelNameMap[$ch['channel_name']] = $ch['channel_name'];
-        }
+        $structuredSources = [];
         
         foreach ($allResults as $result) {
-            if (!empty($result['vod_play_from']) && !empty($result['vod_play_url'])) {
-                $playFrom[] = $result['vod_play_from'];
-                $playUrl[] = $result['vod_play_url'];
+            $channelName = $result['_channel_name'] ?? '';
+            if (empty($channelName)) continue;
+            
+            $vodPlayFrom = $result['vod_play_from'] ?? '';
+            $vodPlayUrl = $result['vod_play_url'] ?? '';
+            
+            if (empty($vodPlayFrom) || empty($vodPlayUrl)) continue;
+            
+            // 按 $$$ 分割每个播放源组
+            $sourceNames = explode('$$$', $vodPlayFrom);
+            $sourceUrls = explode('$$$', $vodPlayUrl);
+            
+            $count = min(count($sourceNames), count($sourceUrls));
+            for ($i = 0; $i < $count; $i++) {
+                $sourceName = trim($sourceNames[$i]);
+                $urlStr = trim($sourceUrls[$i]);
                 
-                // 记录第三方名称到渠道名称的映射
-                $channelName = $result['_channel_name'] ?? '';
-                if ($channelName) {
-                    $sources = explode('$$$', $result['vod_play_from']);
-                    foreach ($sources as $src) {
-                        $src = trim($src);
-                        if ($src && !isset($sourceNameMap[$src])) {
-                            $sourceNameMap[$src] = $channelName;
-                        }
+                if (empty($sourceName) || empty($urlStr)) continue;
+                
+                // 解析剧集列表
+                $episodes = [];
+                $episodeParts = explode('#', $urlStr);
+                foreach ($episodeParts as $part) {
+                    $part = trim($part);
+                    if (empty($part)) continue;
+                    
+                    $episodeData = explode('$', $part);
+                    if (count($episodeData) >= 2) {
+                        $episodes[] = [
+                            'name' => trim($episodeData[0]),
+                            'url' => trim($episodeData[1])
+                        ];
                     }
+                }
+                
+                if (!empty($episodes)) {
+                    $structuredSources[] = [
+                        'name' => $sourceName,
+                        'channel' => $channelName,
+                        'episodes' => $episodes
+                    ];
                 }
             }
         }
         
-        if (!empty($playFrom)) {
-            $mergedVideo['vod_play_from'] = implode('$$$', $playFrom);
-            $mergedVideo['vod_play_url'] = implode('$$$', $playUrl);
-            // 添加渠道名称映射
-            $mergedVideo['vod_play_from_map'] = $sourceNameMap;
-        }
+        $mergedVideo['play_sources'] = $structuredSources;
         
         return json(['code' => 1, 'msg' => 'success', 'list' => [$mergedVideo]]);
     }
