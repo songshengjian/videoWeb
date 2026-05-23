@@ -415,8 +415,6 @@ class IndexController
         $channels = json_decode($channelsJson, true);
         $channelList = $channels['list'] ?? [];
         
-        $apiSearchable = ['量子资源', '暴风资源', '如意', '360', '魔都', '1080资源库', '非凡资源', 'IKUN资源', '电影天堂资源', '豆瓣资源', '影剧资源', '爱奇艺资源'];
-        
         $allResults = [];
         
         foreach ($channelList as $channel) {
@@ -426,7 +424,7 @@ class IndexController
             
             $channelName = $channel['channel_name'] ?? '';
             
-            if (!in_array($channelName, $apiSearchable, true)) {
+            if (empty($channelName)) {
                 continue;
             }
             
