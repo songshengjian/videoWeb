@@ -522,6 +522,7 @@ class IndexController
         }
         
         $mergedVideo['play_sources'] = $structuredSources;
+        $mergedVideo['debug_channels'] = array_count_values(array_column($structuredSources, 'channel'));
         
         return json(['code' => 1, 'msg' => 'success', 'list' => [$mergedVideo]]);
     }
